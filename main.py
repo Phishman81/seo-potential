@@ -1,12 +1,22 @@
-# main.py
-
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 # The list of improvement scenarios
-scenarios = ["Improve rankings by X positions", "Improve all rankings by X%"]
+scenarios = [
+    "Improve all rankings by 1 position",
+    "Improve all rankings by 2 positions",
+    "Improve all rankings by 5 positions",
+    "Improve all rankings by 10 positions",
+    "Improve all rankings by 20%",
+    "Improve all rankings by 50%",
+    "Improve all rankings by 100%",
+    "Lift all rankings below page 2 to random page 2 position",
+    "Lift all rankings below page 1 to random page 1 position",
+    "Lift all rankings to position 1"
+]
 
 # The list of CTR sources
 ctr_sources = ["Source 1", "Source 2", "Source 3"]
@@ -55,7 +65,20 @@ def get_ctr_by_position(ctr_source):
 
 # Calculate potential traffic based on scenario
 def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position):
-    data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x-1 if scenario == scenarios[0] else x*0.9 if scenario == scenarios[1] else x)
+    if "Improve all rankings by" in scenario:
+        if "position" in scenario:
+            improvement = int(scenario.split()[4])  # extract the number of positions to improve
+            data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: max(x - improvement, 1))
+        elif "%" in scenario:
+            improvement = int(scenario.split()[4].strip('%')) / 100  # extract the percentage to improve
+            data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: max(x * (1 - improvement), 1))
+    elif "Lift all rankings below" in scenario:
+        target_page = int(scenario.split()[4])  # extract the target page
+        lower_bound = 10 * (target_page - 1) + 1  # calculate the lower bound of the target page
+        upper_bound = 10 * target_page  # calculate the upper bound of the target page
+        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(lower_bound, upper_bound) if x > upper_bound else x)
+    elif scenario == "Lift all rankings to position 1":
+        data['Adjusted Ranking Position'] = 1
     data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: avg_ctr_by_position[min(round(x), 10)])
     data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
     return data
