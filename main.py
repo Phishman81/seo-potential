@@ -16,6 +16,13 @@ scenarios = [
 # The list of CTR sources
 ctr_sources = ["Source 1", "Source 2", "Source 3"]
 
+# SEO Growth scenarios
+seo_growth_scenarios = {
+    "Minimum": [2, 5, 10, 18, 28, 40, 55, 62, 69, 75, 79, 82, 85, 86, 87, 88],
+    "Average": [1, 3, 6, 12, 20, 33, 50, 62, 70, 76, 80, 83, 85, 87, 89, 90],
+    "Optimum": [0, 2, 5, 11, 20, 33, 50, 67, 80, 90, 95, 97, 99, 100, 100, 100]
+}
+
 # Function to get CTR by position based on source
 def get_ctr_by_position(ctr_source):
     if ctr_source == "Source 1":
@@ -57,7 +64,7 @@ def get_ctr_by_position(ctr_source):
             9: 0.02,
             10: 0.01
         }
-    
+
 # Calculate potential traffic based on scenario
 def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position):
     if scenario == scenarios[0]: # Improve rankings by X positions
@@ -86,6 +93,7 @@ def main():
 
         scenario = st.selectbox('Select an improvement scenario', scenarios)
         ctr_source = st.selectbox('Select a CTR source', ctr_sources)
+        seo_growth_scenario = st.selectbox('Select an SEO growth scenario', list(seo_growth_scenarios.keys()))
 
         avg_ctr_by_position = get_ctr_by_position(ctr_source)
         data = calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position)
@@ -103,21 +111,20 @@ def main():
         st.bar_chart(cluster_data)
 
         st.subheader('Improvement Trajectory')
-        months = np.arange(1, 25)  # 2 years
+        months = np.arange(1, 17)  # 16 months
         current_traffic_per_month = [current_traffic] * len(months)
 
         fig, ax = plt.subplots()
         ax.plot(months, current_traffic_per_month, label='Current Traffic')
 
-        for goal_months in [6, 12, 24]:
-            potential_traffic_per_month = [current_traffic + ((potential_traffic - current_traffic) / goal_months) * min(i, goal_months) for i in months]
-            ax.plot(months, potential_traffic_per_month, label=f'Goal achieved in {goal_months} months', linestyle='--')
-        
+        potential_traffic_per_month = [current_traffic + ((potential_traffic - current_traffic) * (seo_growth_scenarios[seo_growth_scenario][i] / 100)) for i in range(len(months))]
+
+        ax.plot(months, potential_traffic_per_month, label=f'Potential Traffic ({seo_growth_scenario})', linestyle='--')
         ax.set_xlabel('Month')
         ax.set_ylabel('Traffic')
         ax.set_title('Improvement Trajectory of Traffic')
         ax.legend()
-        
+
         plt.tight_layout()
         st.pyplot(fig)
 
