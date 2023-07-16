@@ -18,7 +18,45 @@ ctr_sources = ["Source 1", "Source 2", "Source 3"]
 
 # Function to get CTR by position based on source
 def get_ctr_by_position(ctr_source):
-    # (Ihr bisheriger Code...)
+    if ctr_source == "Source 1":
+        return {
+            1: 0.35,
+            2: 0.25,
+            3: 0.20,
+            4: 0.15,
+            5: 0.10,
+            6: 0.08,
+            7: 0.06,
+            8: 0.04,
+            9: 0.03,
+            10: 0.02
+        }
+    elif ctr_source == "Source 2":
+        return {
+            1: 0.30,
+            2: 0.24,
+            3: 0.18,
+            4: 0.14,
+            5: 0.11,
+            6: 0.07,
+            7: 0.06,
+            8: 0.05,
+            9: 0.03,
+            10: 0.02
+        }
+    elif ctr_source == "Source 3":
+        return {
+            1: 0.32,
+            2: 0.26,
+            3: 0.21,
+            4: 0.15,
+            5: 0.10,
+            6: 0.06,
+            7: 0.04,
+            8: 0.03,
+            9: 0.02,
+            10: 0.01
+        }
     
 # Calculate potential traffic based on scenario
 def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position):
