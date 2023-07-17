@@ -1,122 +1,125 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
+import matplotlib.pyplot as plt
 import numpy as np
 import random
-import matplotlib.pyplot as plt
 
 # The list of improvement scenarios
 scenarios = [
-    "Improve rankings by 1 position", 
+    "Improve rankings by X positions", 
     "Improve all rankings by 10%", 
     "Lift all to random page 2 position",
     "Lift all to random page 1 position",
-    "Lift all to position 1",
-    "Improve all page 3 rankings to random page 2 rankings",
-    "Lift all (higher than page 2) to random page 2 rankings",
-    "Improve all rankings by 20%",
-    "Improve all rankings by 50%",
-    "Lift all to positions 2 - 5",
-    "Lift all to positions 1 - 3"
+    "Lift all to position 1"
 ]
 
+# The list of CTR sources
+ctr_sources = ["Source 1", "Source 2", "Source 3"]
+
+# Function to get CTR by position based on source
+def get_ctr_by_position(ctr_source):
+    if ctr_source == "Source 1":
+        return {
+            1: 0.35,
+            2: 0.25,
+            3: 0.20,
+            4: 0.15,
+            5: 0.10,
+            6: 0.08,
+            7: 0.06,
+            8: 0.04,
+            9: 0.03,
+            10: 0.02
+        }
+    elif ctr_source == "Source 2":
+        return {
+            1: 0.30,
+            2: 0.24,
+            3: 0.18,
+            4: 0.14,
+            5: 0.11,
+            6: 0.07,
+            7: 0.06,
+            8: 0.05,
+            9: 0.03,
+            10: 0.02
+        }
+    elif ctr_source == "Source 3":
+        return {
+            1: 0.32,
+            2: 0.26,
+            3: 0.21,
+            4: 0.15,
+            5: 0.10,
+            6: 0.06,
+            7: 0.04,
+            8: 0.03,
+            9: 0.02,
+            10: 0.01
+        }
+    
 # Calculate potential traffic based on scenario
 def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position):
-    if scenario == scenarios[0]: # Improve rankings by 1 position
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x - 1 if x > 1 else x)
+    if scenario == scenarios[0]: # Improve rankings by X positions
+        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x-1 if x > 1 else x)
     elif scenario == scenarios[1]: # Improve all rankings by 10%
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x * 0.9 if x > 1 else x)
+        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x*0.9 if x > 1 else x)
     elif scenario == scenarios[2]: # Lift all to random page 2 position
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(11,20) if x > 20 else x)
     elif scenario == scenarios[3]: # Lift all to random page 1 position
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(1,10) if x > 10 else x)
     elif scenario == scenarios[4]: # Lift all to position 1
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: 1)
-    elif scenario == scenarios[5]: # Improve all page 3 rankings to random page 2 rankings
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(11,20) if x > 20 and x <= 30 else x)
-    elif scenario == scenarios[6]: # Lift all (higher than page 2) to random page 2 rankings
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(11,20) if x > 20 else x)
-    elif scenario == scenarios[7]: # Improve all rankings by 20%
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x * 0.8 if x > 1 else x)
-    elif scenario == scenarios[8]: # Improve all rankings by 50%
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x * 0.5 if x > 1 else x)
-    elif scenario == scenarios[9]: # Lift all to positions 2 - 5
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(2,5) if x > 5 else x)
-    elif scenario == scenarios[10]: # Lift all to positions 1 - 3
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(1,3) if x > 3 else x)
-
+    
     data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: avg_ctr_by_position[min(round(x), 10)])
     data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
     return data
 
 def main():
-    st.title("SEO Potential Calculator")
+    st.title('SEO Potential Analyzer')
+    st.write('Please upload your CSV file below. The file should contain the following columns: Keyword, Keyword Cluster, Monthly Search Volume per Keyword, Current Clicks per Month for this Website, Current Ranking Position, Current CTR per Keyword for the Website.')
 
-    file = st.file_uploader("Upload file", type=['csv'])
-    if file is not None:
-        data = pd.read_csv(file)
-        st.dataframe(data.head())
+    uploaded_file = st.file_uploader("Choose a CSV file", type='csv')
 
-        # Check if required columns exist
-        if not all(item in data.columns for item in ['Keyword', 'Current Ranking Position', 'Monthly Search Volume per Keyword']):
-            st.error("Required columns not found in the data. Please make sure the following columns exist in your CSV: Keyword, Current Ranking Position, Monthly Search Volume per Keyword")
-            return
+    if uploaded_file is not None:
+        data = pd.read_csv(uploaded_file)
 
-        scenario = st.selectbox("Select an Improvement Scenario", scenarios)
+        scenario = st.selectbox('Select an improvement scenario', scenarios)
+        ctr_source = st.selectbox('Select a CTR source', ctr_sources)
 
-        # Add a dropdown for selecting project trajectory
-        trajectory = st.selectbox("Select project trajectory", ["minimum", "average", "optimum"])
-        run_button = st.button('Run analysis')
+        avg_ctr_by_position = get_ctr_by_position(ctr_source)
+        data = calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position)
 
-        if run_button:
-            avg_ctr_by_position = {
-                1: 0.317, 2: 0.2471, 3: 0.1866, 4: 0.136, 5: 0.0951, 6: 0.0623, 7: 0.04, 8: 0.03, 9: 0.02, 10: 0.02,
-                **dict.fromkeys(range(11, 21), 0.015),
-                **dict.fromkeys(range(21, 31), 0.01),
-                **dict.fromkeys(range(31, 41), 0.008),
-                **dict.fromkeys(range(41, 51), 0.007),
-                **dict.fromkeys(range(51, 61), 0.006),
-                **dict.fromkeys(range(61, 71), 0.005),
-                **dict.fromkeys(range(71, 81), 0.004),
-                **dict.fromkeys(range(81, 91), 0.003),
-                **dict.fromkeys(range(91, 101), 0.002)
-            }
+        st.dataframe(data)
+        
+        current_traffic = data['Current Clicks per Month for this Website'].sum()
+        potential_traffic = data['Potential Traffic'].sum()
 
-            data['Current CTR'] = data['Current Ranking Position'].apply(lambda x: avg_ctr_by_position[min(round(x), 10)])
-            data['Current Traffic'] = data['Current CTR'] * data['Monthly Search Volume per Keyword']
+        st.subheader('Total Current Traffic vs. Total Potential Traffic')
+        st.bar_chart(pd.DataFrame({'Traffic': [current_traffic, potential_traffic]}, index=['Current', 'Potential']))
+        
+        st.subheader('Traffic by Keyword Cluster')
+        cluster_data = data.groupby('Keyword Cluster').sum()[['Current Clicks per Month for this Website', 'Potential Traffic']]
+        st.bar_chart(cluster_data)
 
-            data = calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position)
-            data['Traffic Difference'] = data['Potential Traffic'] - data['Current Traffic']
+        st.subheader('Improvement Trajectory')
+        months = np.arange(1, 25)  # 2 years
+        current_traffic_per_month = [current_traffic] * len(months)
 
-            st.dataframe(data)
+        fig, ax = plt.subplots()
+        ax.plot(months, current_traffic_per_month, label='Current Traffic')
 
-            fig, ax = plt.subplots()
-            ax.hist(data['Traffic Difference'], bins=30, alpha=0.75)
-            ax.set_xlabel('Traffic Difference')
-            ax.set_ylabel('Number of Keywords')
-            ax.set_title('Histogram of Traffic Differences')
-            plt.show()
-            st.pyplot(fig)
-
-            # Traffic Improvement Over Time
-            improvement_scenarios = {
-                "minimum": {month: min(0.05 + month * 0.04, 0.7) for month in range(1, 17)},
-                "average": {month: min(0.05 + month * 0.05, 0.85) for month in range(1, 17)},
-                "optimum": {month: min(0.05 + month * 0.06, 1.0) for month in range(1, 17)},
-            }
-
-            improvement_percentage = improvement_scenarios[trajectory]
-            potential_total_traffic = data['Potential Traffic'].sum()
-            current_total_traffic = data['Current Traffic'].sum()
-            total_traffic_difference = potential_total_traffic - current_total_traffic
-
-            projected_traffic = [current_total_traffic + total_traffic_difference * improvement_percentage[month] for month in range(1, 17)]
-            fig2, ax2 = plt.subplots()
-            ax2.plot(range(1, 17), projected_traffic)
-            ax2.set_xlabel('Month')
-            ax2.set_ylabel('Projected Traffic')
-            ax2.set_title('Projected Traffic Over Time')
-            plt.show()
-            st.pyplot(fig2)
+        for goal_months in [6, 12, 24]:
+            potential_traffic_per_month = [current_traffic + ((potential_traffic - current_traffic) / goal_months) * min(i, goal_months) for i in months]
+            ax.plot(months, potential_traffic_per_month, label=f'Goal achieved in {goal_months} months', linestyle='--')
+        
+        ax.set_xlabel('Month')
+        ax.set_ylabel('Traffic')
+        ax.set_title('Improvement Trajectory of Traffic')
+        ax.legend()
+        
+        plt.tight_layout()
+        st.pyplot(fig)
 
 if __name__ == "__main__":
     main()
