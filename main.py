@@ -6,7 +6,7 @@ import random
 
 # The list of improvement scenarios
 scenarios = [
-    "Improve rankings by X positions", 
+    "Improve rankings by 1 position", 
     "Improve all rankings by 10%", 
     "Lift all to random page 2 position",
     "Lift all to random page 1 position",
