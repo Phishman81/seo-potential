@@ -67,16 +67,17 @@ def get_ctr_by_position(ctr_source):
 
 # Calculate potential traffic based on scenario
 def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position):
+    data = data.copy()
     if scenario == scenarios[0]: # Improve rankings by X positions
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x-1 if x > 1 else x)
+        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: max(1, x-1))
     elif scenario == scenarios[1]: # Improve all rankings by 10%
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x*0.9 if x > 1 else x)
+        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: max(1, round(x*0.9)))
     elif scenario == scenarios[2]: # Lift all to random page 2 position
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(11,20) if x > 20 else x)
     elif scenario == scenarios[3]: # Lift all to random page 1 position
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(1,10) if x > 10 else x)
     elif scenario == scenarios[4]: # Lift all to position 1
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: 1)
+        data['Adjusted Ranking Position'] = 1
     
     data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: avg_ctr_by_position[min(round(x), 10)])
     data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
