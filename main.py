@@ -63,8 +63,7 @@ def main():
 
         scenario = st.selectbox("Select an Improvement Scenario", scenarios)
         
-        
-# Add a dropdown for selecting project trajectory
+        # Add a dropdown for selecting project trajectory
 trajectory = st.selectbox("Select project trajectory", ["minimum", "average", "optimum"])
 run_button = st.button('Run analysis')
         if run_button:
