@@ -43,7 +43,7 @@ def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_pos
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(2,5) if x > 5 else x)
     elif scenario == scenarios[10]: # Lift all to positions 1 - 3
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(1,3) if x > 3 else x)
-    
+
     data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: avg_ctr_by_position[min(round(x), 10)])
     data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
     return data
@@ -55,31 +55,31 @@ def main():
     if file is not None:
         data = pd.read_csv(file)
         st.dataframe(data.head())
-        
+
         # Check if required columns exist
         if not all(item in data.columns for item in ['Keyword', 'Current Ranking Position', 'Monthly Search Volume per Keyword']):
             st.error("Required columns not found in the data. Please make sure the following columns exist in your CSV: Keyword, Current Ranking Position, Monthly Search Volume per Keyword")
             return
 
         scenario = st.selectbox("Select an Improvement Scenario", scenarios)
-        
+
         # Add a dropdown for selecting project trajectory
-trajectory = st.selectbox("Select project trajectory", ["minimum", "average", "optimum"])
-run_button = st.button('Run analysis')
+        trajectory = st.selectbox("Select project trajectory", ["minimum", "average", "optimum"])
+        run_button = st.button('Run analysis')
         if run_button:
 
             avg_ctr_by_position = {
-        1: 0.317, 2: 0.2471, 3: 0.1866, 4: 0.136, 5: 0.0951, 6: 0.0623, 7: 0.04, 8: 0.03, 9: 0.02, 10: 0.02,
-        **dict.fromkeys(range(11, 21), 0.015),
-        **dict.fromkeys(range(21, 31), 0.01),
-        **dict.fromkeys(range(31, 41), 0.008),
-        **dict.fromkeys(range(41, 51), 0.007),
-        **dict.fromkeys(range(51, 61), 0.006),
-        **dict.fromkeys(range(61, 71), 0.005),
-        **dict.fromkeys(range(71, 81), 0.004),
-        **dict.fromkeys(range(81, 91), 0.003),
-        **dict.fromkeys(range(91, 101), 0.002)
-    }
+                1: 0.317, 2: 0.2471, 3: 0.1866, 4: 0.136, 5: 0.0951, 6: 0.0623, 7: 0.04, 8: 0.03, 9: 0.02, 10: 0.02,
+                **dict.fromkeys(range(11, 21), 0.015),
+                **dict.fromkeys(range(21, 31), 0.01),
+                **dict.fromkeys(range(31, 41), 0.008),
+                **dict.fromkeys(range(41, 51), 0.007),
+                **dict.fromkeys(range(51, 61), 0.006),
+                **dict.fromkeys(range(61, 71), 0.005),
+                **dict.fromkeys(range(71, 81), 0.004),
+                **dict.fromkeys(range(81, 91), 0.003),
+                **dict.fromkeys(range(91, 101), 0.002)
+            }
 
             data['Current CTR'] = data['Current Ranking Position'].apply(lambda x: avg_ctr_by_position[min(round(x), 10)])
             data['Current Traffic'] = data['Current CTR'] * data['Monthly Search Volume per Keyword']
@@ -104,5 +104,6 @@ improvement_scenarios = {
     "average": {month: min(0.05 + month * 0.05, 0.85) for month in range(1, 17)},
     "optimum": {month: min(0.05 + month * 0.06, 1.0) for month in range(1, 17)},
 }
+
 if __name__ == "__main__":
     main()
