@@ -63,7 +63,10 @@ def main():
 
         scenario = st.selectbox("Select an Improvement Scenario", scenarios)
         
-        run_button = st.button('Run analysis')
+        
+# Add a dropdown for selecting project trajectory
+trajectory = st.selectbox("Select project trajectory", ["minimum", "average", "optimum"])
+run_button = st.button('Run analysis')
         if run_button:
 
             avg_ctr_by_position = {
@@ -95,5 +98,12 @@ def main():
             plt.show()
             st.pyplot(fig)
 
+
+# Define the percentage of ranking improvement achieved at each month for each scenario
+improvement_scenarios = {
+    "minimum": {month: min(0.05 + month * 0.04, 0.7) for month in range(1, 17)},
+    "average": {month: min(0.05 + month * 0.05, 0.85) for month in range(1, 17)},
+    "optimum": {month: min(0.05 + month * 0.06, 1.0) for month in range(1, 17)},
+}
 if __name__ == "__main__":
     main()
