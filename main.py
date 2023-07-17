@@ -6,7 +6,7 @@ import random
 
 # The list of improvement scenarios
 scenarios = [
-    "Improve rankings by 1 position", 
+    "Improve rankings by X positions", 
     "Improve all rankings by 10%", 
     "Lift all to random page 2 position",
     "Lift all to random page 1 position",
@@ -100,23 +100,48 @@ def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_pos
     data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
     return data
 
+def draw_graphs(data, seo_growth_scenario):
+    # Create a line graph of current and potential clicks
+    st.subheader('Current vs Potential Clicks per Keyword')
+    plt.figure(figsize=(12, 6))
+    plt.plot(data['Keyword'], data['Current Clicks per Month for this Website'], color='skyblue', label='Current Clicks')
+    plt.plot(data['Keyword'], data['Potential Traffic'], color='green', label='Potential Traffic')
+    plt.xticks(rotation=90)
+    plt.legend()
+    st.pyplot(plt)
+
+    # Create a bar graph for SEO growth scenarios
+    st.subheader('SEO Growth Scenarios')
+    plt.figure(figsize=(12, 6))
+    plt.bar(list(seo_growth_scenarios.keys()), [sum(data['Potential Traffic']) * (scenario/100) for scenario in seo_growth_scenarios[seo_growth_scenario]], color=['skyblue', 'green', 'purple'])
+    plt.ylabel('Traffic')
+    st.pyplot(plt)
+
 def main():
-    st.title('SEO Potential Analyzer')
-    st.write('Please upload your CSV file below. The file should contain the following columns: Keyword, Keyword Cluster, Monthly Search Volume per Keyword, Current Clicks per Month for this Website, Current Ranking Position, Current CTR per Keyword for the Website.')
+    # Load the data
+    data = pd.read_excel('example_data.xlsx')
 
-    uploaded_file = st.file_uploader("Choose a CSV file", type='csv')
+    # Create the sidebar inputs
+    st.sidebar.header('Input Options')
+    scenario = st.sidebar.selectbox('Improvement Scenario', scenarios)
+    ctr_source = st.sidebar.selectbox('CTR Source', ctr_sources)
+    seo_growth_scenario = st.sidebar.selectbox('SEO Growth Scenario', list(seo_growth_scenarios.keys()))
 
-    if uploaded_file is not None:
-        data = pd.read_csv(uploaded_file)
+    # Get the average CTR by position
+    avg_ctr_by_position = get_ctr_by_position(ctr_source)
 
-        scenario = st.selectbox('Select an improvement scenario', scenarios)
-        ctr_source = st.selectbox('Select a CTR source', ctr_sources)
-        seo_growth_scenario = st.selectbox('Select an SEO growth scenario', list(seo_growth_scenarios.keys()))
+    # Calculate current traffic
+    data['Current CTR'] = data['Current Ranking Position'].apply(lambda x: avg_ctr_by_position[min(x, 10)])
+    data['Current Clicks per Month for this Website'] = data['Current CTR'] * data['Monthly Search Volume per Keyword']
 
-        avg_ctr_by_position = get_ctr_by_position(ctr_source)
-        data = calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position)
+    # Calculate potential traffic
+    data = calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position)
+    
+    # Display data
+    st.dataframe(data)
 
-        st.dataframe(data)
-        
+    # Draw graphs
+    draw_graphs(data, seo_growth_scenario)
+
 if __name__ == "__main__":
     main()
