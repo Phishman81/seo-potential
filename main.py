@@ -57,7 +57,7 @@ def get_ctr_by_position(ctr_source):
             9: 0.02,
             10: 0.01
         }
-    
+
 # Calculate potential traffic based on scenario
 def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position):
     if scenario == scenarios[0]: # Improve rankings by X positions
@@ -70,8 +70,8 @@ def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_pos
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(1,10) if x > 10 else x)
     elif scenario == scenarios[4]: # Lift all to position 1
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: 1)
-    
-    data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: avg_ctr_by_position[min(round(x), 10)])
+
+    data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: avg_ctr_by_position.get(min(round(max(1, x)), 10), 0))
     data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
     return data
 
@@ -82,44 +82,61 @@ def main():
     uploaded_file = st.file_uploader("Choose a CSV file", type='csv')
 
     if uploaded_file is not None:
-        data = pd.read_csv(uploaded_file)
+        try:
+            data = pd.read_csv(uploaded_file)
 
-        scenario = st.selectbox('Select an improvement scenario', scenarios)
-        ctr_source = st.selectbox('Select a CTR source', ctr_sources)
+            expected_columns = [
+                "Keyword", 
+                "Keyword Cluster", 
+                "Monthly Search Volume per Keyword", 
+                "Current Clicks per Month for this Website", 
+                "Current Ranking Position", 
+                "Current CTR per Keyword for the Website"
+            ]
+            
+            if not all(col in data.columns for col in expected_columns):
+                st.error("CSV file must contain the following columns: " + ', '.join(expected_columns))
+                return
 
-        avg_ctr_by_position = get_ctr_by_position(ctr_source)
-        data = calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position)
+            scenario = st.selectbox('Select an improvement scenario', scenarios)
+            ctr_source = st.selectbox('Select a CTR source', ctr_sources)
 
-        st.dataframe(data)
-        
-        current_traffic = data['Current Clicks per Month for this Website'].sum()
-        potential_traffic = data['Potential Traffic'].sum()
+            avg_ctr_by_position = get_ctr_by_position(ctr_source)
+            data = calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position)
 
-        st.subheader('Total Current Traffic vs. Total Potential Traffic')
-        st.bar_chart(pd.DataFrame({'Traffic': [current_traffic, potential_traffic]}, index=['Current', 'Potential']))
-        
-        st.subheader('Traffic by Keyword Cluster')
-        cluster_data = data.groupby('Keyword Cluster').sum()[['Current Clicks per Month for this Website', 'Potential Traffic']]
-        st.bar_chart(cluster_data)
+            st.dataframe(data)
+            
+            current_traffic = data['Current Clicks per Month for this Website'].sum()
+            potential_traffic = data['Potential Traffic'].sum()
 
-        st.subheader('Improvement Trajectory')
-        months = np.arange(1, 25)  # 2 years
-        current_traffic_per_month = [current_traffic] * len(months)
+            st.subheader('Total Current Traffic vs. Total Potential Traffic')
+            st.bar_chart(pd.DataFrame({'Traffic': [current_traffic, potential_traffic]}, index=['Current', 'Potential']))
+            
+            st.subheader('Traffic by Keyword Cluster')
+            cluster_data = data.groupby('Keyword Cluster').sum()[['Current Clicks per Month for this Website', 'Potential Traffic']]
+            st.bar_chart(cluster_data)
 
-        fig, ax = plt.subplots()
-        ax.plot(months, current_traffic_per_month, label='Current Traffic')
+            st.subheader('Improvement Trajectory')
+            months = np.arange(1, 25)  # 2 years
+            current_traffic_per_month = [current_traffic] * len(months)
 
-        for goal_months in [6, 12, 24]:
-            potential_traffic_per_month = [current_traffic + ((potential_traffic - current_traffic) / goal_months) * min(i, goal_months) for i in months]
-            ax.plot(months, potential_traffic_per_month, label=f'Goal achieved in {goal_months} months', linestyle='--')
-        
-        ax.set_xlabel('Month')
-        ax.set_ylabel('Traffic')
-        ax.set_title('Improvement Trajectory of Traffic')
-        ax.legend()
-        
-        plt.tight_layout()
-        st.pyplot(fig)
+            fig, ax = plt.subplots()
+            ax.plot(months, current_traffic_per_month, label='Current Traffic')
+
+            for goal_months in [6, 12, 24]:
+                potential_traffic_per_month = [current_traffic + ((potential_traffic - current_traffic) / goal_months) * min(i, goal_months) for i in months]
+                ax.plot(months, potential_traffic_per_month, label=f'Goal achieved in {goal_months} months', linestyle='--')
+            
+            ax.set_xlabel('Month')
+            ax.set_ylabel('Traffic')
+            ax.set_title('Improvement Trajectory of Traffic')
+            ax.legend()
+            
+            plt.tight_layout()
+            st.pyplot(fig)
+            
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
