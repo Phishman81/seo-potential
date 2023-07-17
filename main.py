@@ -66,7 +66,18 @@ def main():
         run_button = st.button('Run analysis')
         if run_button:
 
-            avg_ctr_by_position = {1: 0.36, 2: 0.13, 3: 0.09, 4: 0.06, 5: 0.04, 6: 0.03, 7: 0.02, 8: 0.02, 9: 0.02, 10: 0.02}
+            avg_ctr_by_position = {
+        1: 0.317, 2: 0.2471, 3: 0.1866, 4: 0.136, 5: 0.0951, 6: 0.0623, 7: 0.04, 8: 0.03, 9: 0.02, 10: 0.02,
+        **dict.fromkeys(range(11, 21), 0.015),
+        **dict.fromkeys(range(21, 31), 0.01),
+        **dict.fromkeys(range(31, 41), 0.008),
+        **dict.fromkeys(range(41, 51), 0.007),
+        **dict.fromkeys(range(51, 61), 0.006),
+        **dict.fromkeys(range(61, 71), 0.005),
+        **dict.fromkeys(range(71, 81), 0.004),
+        **dict.fromkeys(range(81, 91), 0.003),
+        **dict.fromkeys(range(91, 101), 0.002)
+    }
 
             data['Current CTR'] = data['Current Ranking Position'].apply(lambda x: avg_ctr_by_position[min(round(x), 10)])
             data['Current Traffic'] = data['Current CTR'] * data['Monthly Search Volume per Keyword']
