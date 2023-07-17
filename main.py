@@ -22,9 +22,9 @@ scenarios = [
 # Calculate potential traffic based on scenario
 def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position):
     if scenario == scenarios[0]: # Improve rankings by 1 position
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x-1 if x > 1 else x)
+        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x - 1 if x > 1 else x)
     elif scenario == scenarios[1]: # Improve all rankings by 10%
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x*0.9 if x > 1 else x)
+        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x * 0.9 if x > 1 else x)
     elif scenario == scenarios[2]: # Lift all to random page 2 position
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(11,20) if x > 20 else x)
     elif scenario == scenarios[3]: # Lift all to random page 1 position
@@ -36,9 +36,9 @@ def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_pos
     elif scenario == scenarios[6]: # Lift all (higher than page 2) to random page 2 rankings
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(11,20) if x > 20 else x)
     elif scenario == scenarios[7]: # Improve all rankings by 20%
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x*0.8 if x > 1 else x)
+        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x * 0.8 if x > 1 else x)
     elif scenario == scenarios[8]: # Improve all rankings by 50%
-        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x*0.5 if x > 1 else x)
+        data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x * 0.5 if x > 1 else x)
     elif scenario == scenarios[9]: # Lift all to positions 2 - 5
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(2,5) if x > 5 else x)
     elif scenario == scenarios[10]: # Lift all to positions 1 - 3
@@ -66,8 +66,8 @@ def main():
         # Add a dropdown for selecting project trajectory
         trajectory = st.selectbox("Select project trajectory", ["minimum", "average", "optimum"])
         run_button = st.button('Run analysis')
-        if run_button:
 
+        if run_button:
             avg_ctr_by_position = {
                 1: 0.317, 2: 0.2471, 3: 0.1866, 4: 0.136, 5: 0.0951, 6: 0.0623, 7: 0.04, 8: 0.03, 9: 0.02, 10: 0.02,
                 **dict.fromkeys(range(11, 21), 0.015),
@@ -97,13 +97,26 @@ def main():
             plt.show()
             st.pyplot(fig)
 
+            # Traffic Improvement Over Time
+            improvement_scenarios = {
+                "minimum": {month: min(0.05 + month * 0.04, 0.7) for month in range(1, 17)},
+                "average": {month: min(0.05 + month * 0.05, 0.85) for month in range(1, 17)},
+                "optimum": {month: min(0.05 + month * 0.06, 1.0) for month in range(1, 17)},
+            }
 
-# Define the percentage of ranking improvement achieved at each month for each scenario
-improvement_scenarios = {
-    "minimum": {month: min(0.05 + month * 0.04, 0.7) for month in range(1, 17)},
-    "average": {month: min(0.05 + month * 0.05, 0.85) for month in range(1, 17)},
-    "optimum": {month: min(0.05 + month * 0.06, 1.0) for month in range(1, 17)},
-}
+            improvement_percentage = improvement_scenarios[trajectory]
+            potential_total_traffic = data['Potential Traffic'].sum()
+            current_total_traffic = data['Current Traffic'].sum()
+            total_traffic_difference = potential_total_traffic - current_total_traffic
+
+            projected_traffic = [current_total_traffic + total_traffic_difference * improvement_percentage[month] for month in range(1, 17)]
+            fig2, ax2 = plt.subplots()
+            ax2.plot(range(1, 17), projected_traffic)
+            ax2.set_xlabel('Month')
+            ax2.set_ylabel('Projected Traffic')
+            ax2.set_title('Projected Traffic Over Time')
+            plt.show()
+            st.pyplot(fig2)
 
 if __name__ == "__main__":
     main()
