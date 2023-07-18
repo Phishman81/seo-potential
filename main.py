@@ -4,6 +4,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 
+# Customize the layout
+st.set_page_config(page_title="DOCAI", page_icon="🤖", layout="wide", )     
+st.markdown(f"""
+            <style>
+            .stApp {{background-image: url("https://images.unsplash.com/photo-1509537257950-20f875b03669?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80"); 
+                     background-attachment: fixed;
+                     background-size: cover}}
+         </style>
+         """, unsafe_allow_html=True)
+
 # The list of improvement scenarios
 scenarios = [
     "Improve rankings by X positions", 
