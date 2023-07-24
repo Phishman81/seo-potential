@@ -7,7 +7,7 @@ import random
 st.set_page_config(page_title="SEO-Potential-Analysis", page_icon="🤖", layout="wide", )     
 st.markdown(f"""
             <style>
-            .stApp {{background-image: url("https://images.unsplash.com/photo-1509537257950-20f875b03669?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fGVufDB8fHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80"); 
+            .stApp {{background-image: url("https://images.unsplash.com/photo-1509537257950-20f875b03669?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80"); 
                      background-attachment: fixed;
                      background-size: cover}}
          </style>
@@ -43,15 +43,15 @@ def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_pos
 
     for month, rate in zip(range(1, 25), monthly_rates):  # 24 months
         if scenario == scenarios[0]: # Improve rankings by X positions
-            data['Adjusted Ranking Position'] = np.maximum(data['Current Ranking Position'] - (data['Current Ranking Position'] - 1) * rate, 1)
+            data['Adjusted Ranking Position'] = data['Current Ranking Position'] - (rate if (data['Current Ranking Position'] > 1).any() else 0)
         elif scenario == scenarios[1]: # Improve all rankings by 10%
-            data['Adjusted Ranking Position'] = np.maximum(data['Current Ranking Position'] - (data['Current Ranking Position'] * 0.9) * rate, 1)
+            data['Adjusted Ranking Position'] = data['Current Ranking Position'] - (0.1 * rate if (data['Current Ranking Position'] > 1).any() else 0)
         elif scenario == scenarios[2]: # Lift all to random page 2 position
-            data['Adjusted Ranking Position'] = np.maximum(data['Current Ranking Position'] - (data['Current Ranking Position'] - random.randint(11,20)) * rate, 1)
+            data['Adjusted Ranking Position'] = random.randint(11, 20) if (data['Current Ranking Position'] > 20).any() else data['Current Ranking Position']
         elif scenario == scenarios[3]: # Lift all to random page 1 position
-            data['Adjusted Ranking Position'] = np.maximum(data['Current Ranking Position'] - (data['Current Ranking Position'] - random.randint(1,10)) * rate, 1)
+            data['Adjusted Ranking Position'] = random.randint(1, 10) if (data['Current Ranking Position'] > 10).any() else data['Current Ranking Position']
         elif scenario == scenarios[4]: # Lift all to position 1
-            data['Adjusted Ranking Position'] = np.maximum(data['Current Ranking Position'] - (data['Current Ranking Position'] - 1) * rate, 1)
+            data['Adjusted Ranking Position'] = 1
 
         data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: avg_ctr_by_position.get(min(round(x), 10), 0))
         data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
@@ -91,6 +91,7 @@ def main():
             scenario = st.selectbox('Select an improvement scenario', scenarios)
 
             avg_ctr_by_position = get_ctr_by_position()
+
             # Define manual monthly improvement rates over 24 months
             monthly_rates = [
                 0.05, 0.07, 0.09, 0.10, 0.12, 0.14,
@@ -98,6 +99,7 @@ def main():
                 0.40, 0.44, 0.48, 0.52, 0.55, 0.60,
                 0.65, 0.70, 0.75, 0.80, 0.85, 1.00
             ]
+
             monthly_projections = calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position, monthly_rates)
 
             st.dataframe(monthly_projections)
