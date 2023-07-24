@@ -2,7 +2,6 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 import random
-from scipy.special import expit
 
 # Customize the layout
 st.set_page_config(page_title="SEO-Potential-Analysis", page_icon="🤖", layout="wide", )     
@@ -55,14 +54,6 @@ def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_pos
     data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
     return data
 
-def calculate_future_traffic_sigmoid(current, potential, months, scale_factor):
-    month_indices = np.arange(1, months+1)
-    future_traffic = pd.DataFrame({
-        'Month': month_indices,
-        'Traffic': current + ((potential - current) * expit((month_indices - months / 2) / scale_factor))
-    })
-    return future_traffic
-
 def main():
     st.title('SEO Potential Analyzer')
     st.write('Please upload your CSV file below. The file should contain the following columns: Keyword, Keyword Cluster, Monthly Search Volume per Keyword, Current Clicks per Month for this Website, Current Ranking Position, Current CTR per Keyword for the Website.')
@@ -96,17 +87,26 @@ def main():
             current_traffic = data['Current Clicks per Month for this Website'].sum()
             potential_traffic = data['Potential Traffic'].sum()
 
-            st.subheader('Total Current Traffic: {}'.format(current_traffic))
-            st.subheader('Total Potential Traffic: {}'.format(potential_traffic))
+            # Define manual monthly improvement rates over 24 months
+            monthly_rates = [
+                0.05, 0.07, 0.09, 0.10, 0.12, 0.14,
+                0.16, 0.20, 0.24, 0.28, 0.30, 0.35,
+                0.40, 0.44, 0.48, 0.52, 0.55, 0.60,
+                0.65, 0.70, 0.75, 0.80, 0.85, 1.00
+            ]
+            
+            monthly_traffics = [current_traffic]
+            for rate in monthly_rates:
+                monthly_traffics.append(monthly_traffics[-1] + (potential_traffic - current_traffic) * rate)
 
-            # Default scale factor for expit function, change this value to adjust the rate of growth.
-            scale_factor = 5
-            future_traffic = calculate_future_traffic_sigmoid(current_traffic, potential_traffic, 24, scale_factor)
-            st.subheader('Future Traffic (for 24 months):')
-            st.dataframe(future_traffic)
+            st.subheader('Improvement Trajectory')
+            st.line_chart(pd.DataFrame({
+                'Month': list(range(25)),
+                'Traffic': monthly_traffics
+            }))
 
         except Exception as e:
-            st.error(f"An error occurred: {e}")
-
+            st.error(f'Error reading file: {e}')
+        
 if __name__ == "__main__":
     main()
