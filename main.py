@@ -2,12 +2,13 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 import random
+from scipy.special import expit
 
 # Customize the layout
 st.set_page_config(page_title="SEO-Potential-Analysis", page_icon="🤖", layout="wide", )     
 st.markdown(f"""
             <style>
-            .stApp {{background-image: url("https://images.unsplash.com/photo-1509537257950-20f875b03669?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80"); 
+            .stApp {{background-image: url("https://images.unsplash.com/photo-1509537257950-20f875b03669?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80"); 
                      background-attachment: fixed;
                      background-size: cover}}
          </style>
@@ -54,6 +55,14 @@ def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_pos
     data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
     return data
 
+def calculate_future_traffic_sigmoid(current, potential, months, scale_factor):
+    month_indices = np.arange(1, months+1)
+    future_traffic = pd.DataFrame({
+        'Month': month_indices,
+        'Traffic': current + ((potential - current) * expit((month_indices - months / 2) / scale_factor))
+    })
+    return future_traffic
+
 def main():
     st.title('SEO Potential Analyzer')
     st.write('Please upload your CSV file below. The file should contain the following columns: Keyword, Keyword Cluster, Monthly Search Volume per Keyword, Current Clicks per Month for this Website, Current Ranking Position, Current CTR per Keyword for the Website.')
@@ -89,6 +98,12 @@ def main():
 
             st.subheader('Total Current Traffic: {}'.format(current_traffic))
             st.subheader('Total Potential Traffic: {}'.format(potential_traffic))
+
+            # Default scale factor for expit function, change this value to adjust the rate of growth.
+            scale_factor = 5
+            future_traffic = calculate_future_traffic_sigmoid(current_traffic, potential_traffic, 24, scale_factor)
+            st.subheader('Future Traffic (for 24 months):')
+            st.dataframe(future_traffic)
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
