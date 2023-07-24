@@ -44,13 +44,13 @@ def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_pos
 
     for month, rate in zip(range(1, 25), monthly_rates):  # 24 months
         if scenario == scenarios[0]: # Improve rankings by X positions
-            data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x - rate if x > 1 else x)
+            data['Adjusted Ranking Position'] = np.where(data['Current Ranking Position'] > 1, data['Current Ranking Position'] - rate, data['Current Ranking Position'])
         elif scenario == scenarios[1]: # Improve all rankings by 10%
-            data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: x - 0.1 * rate if x > 1 else x)
+            data['Adjusted Ranking Position'] = np.where(data['Current Ranking Position'] > 1, data['Current Ranking Position'] - 0.1 * rate, data['Current Ranking Position'])
         elif scenario == scenarios[2]: # Lift all to random page 2 position
-            data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(11, 20) if x > 20 else x)
+            data['Adjusted Ranking Position'] = np.where(data['Current Ranking Position'] > 20, random.randint(11, 20), data['Current Ranking Position'])
         elif scenario == scenarios[3]: # Lift all to random page 1 position
-            data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: random.randint(1, 10) if x > 10 else x)
+            data['Adjusted Ranking Position'] = np.where(data['Current Ranking Position'] > 10, random.randint(1, 10), data['Current Ranking Position'])
         elif scenario == scenarios[4]: # Lift all to position 1
             data['Adjusted Ranking Position'] = 1
 
