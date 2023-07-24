@@ -81,7 +81,7 @@ def calculate_potential_traffic(data, scenario, success, conversion_value):
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: 1)
 
     data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: avg_ctr_by_position.get(min(round(max(1, x)), 10), 0))
-    data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume']
+    data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
     data['Potential Conversion'] = data['Potential Traffic'] * data['Conversion Rate']
     data['Potential Conversion Value'] = data['Potential Conversion'] * conversion_value
     data['Success Scenario'] = success
@@ -108,21 +108,27 @@ if uploaded_file is not None:
         # Dropdowns and selectors
         cluster = st.multiselect('Cluster for improvement', data['Cluster'].unique().tolist() + ['all keywords'])
         scenario = st.selectbox('Ranking Scenario', scenarios)
-        success = st.selectbox('Project Success Scenario', list(project_success_scenarios.keys()))
-        conversion_value = st.number_input('Conversion value (£)', min_value=0.0, step=0.1, value=0.0)
+        success = st.selectbox('Project Success', list(project_success_scenarios.keys()))
+        conversion_value = st.number_input('Average value of a conversion in €', value=0.0)
 
-        if cluster and scenario and success and conversion_value:
-            # Filter data
+        # Data processing button
+        if st.button('Run analysis'):
+            data['Search Intent'] = data['Search Intent'].apply(lambda x: conversion_rate_ranges.get(x, (0, 0)))
+            data['Conversion Rate'] = data.apply(lambda row: np.random.uniform(row['Search Intent'][0], row['Search Intent'][1]) / 100, axis=1)
+
+            # Subset the data if a cluster is selected
             if 'all keywords' not in cluster:
                 data = data[data['Cluster'].isin(cluster)]
-                
-            # Apply project success scenario
-            data['Conversion Rate'] = data.apply(lambda row: project_success_scenarios[success][int(row['Current Ranking Position'])-1]/100, axis=1)
 
-            # Calculate potential traffic
-            data = calculate_potential_traffic(data, scenario, success, conversion_value)
+            success_scenario = project_success_scenarios[success]
+    
+            # Iterate over each month in the success scenario
+            for i, success_rate in enumerate(success_scenario):
+                # Calculate potential traffic
+                month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
+        
+                # Store month data
+                month_data.to_csv(f'output_month_{i+1}.csv', index=False)
 
-            # Display results
-            st.dataframe(data)
-else:
-    st.info('Please upload a CSV file.')
+            st.success('Analysis complete. Please check your directory for the output files.')
+
