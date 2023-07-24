@@ -1,6 +1,5 @@
 import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
 import numpy as np
 import random
 
@@ -88,32 +87,9 @@ def main():
             current_traffic = data['Current Clicks per Month for this Website'].sum()
             potential_traffic = data['Potential Traffic'].sum()
 
-            st.subheader('Total Current Traffic vs. Total Potential Traffic')
-            st.bar_chart(pd.DataFrame({'Traffic': [current_traffic, potential_traffic]}, index=['Current', 'Potential']))
-            
-            st.subheader('Traffic by Keyword Cluster')
-            cluster_data = data.groupby('Keyword Cluster').sum()[['Current Clicks per Month for this Website', 'Potential Traffic']]
-            st.bar_chart(cluster_data)
+            st.subheader('Total Current Traffic: {}'.format(current_traffic))
+            st.subheader('Total Potential Traffic: {}'.format(potential_traffic))
 
-            st.subheader('Improvement Trajectory')
-            months = np.arange(1, 25)  # 2 years
-            current_traffic_per_month = [current_traffic] * len(months)
-
-            fig, ax = plt.subplots()
-            ax.plot(months, current_traffic_per_month, label='Current Traffic')
-
-            for goal_months in [6, 12, 24]:
-                potential_traffic_per_month = [current_traffic + ((potential_traffic - current_traffic) / goal_months) * min(i, goal_months) for i in months]
-                ax.plot(months, potential_traffic_per_month, label=f'Goal achieved in {goal_months} months', linestyle='--')
-            
-            ax.set_xlabel('Month')
-            ax.set_ylabel('Traffic')
-            ax.set_title('Improvement Trajectory of Traffic')
-            ax.legend()
-            
-            plt.tight_layout()
-            st.pyplot(fig)
-            
         except Exception as e:
             st.error(f"An error occurred: {e}")
 
