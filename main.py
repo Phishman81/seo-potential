@@ -81,7 +81,7 @@ def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_pos
     elif scenario == scenarios[4]: # Lift all to position 1
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: 1)
 
-            data['Potential CTR'] = data.apply(lambda x: max(x['Current CTR per Keyword for the Website'], avg_ctr_by_position.get(min(round(max(1, x['Adjusted Ranking Position'])), 10), 0)), axis=1)
+    data['Potential CTR'] = data.apply(lambda x: max(x['Current CTR per Keyword for the Website'], avg_ctr_by_position.get(min(round(max(1, x['Adjusted Ranking Position'])), 10), 0)), axis=1)
     data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
     return data
 
