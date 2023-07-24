@@ -39,28 +39,30 @@ def get_ctr_by_position():
 
 # Calculate potential traffic based on scenario
 def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position, monthly_rates):
-    monthly_projections = pd.DataFrame(columns=['Month', 'Total Potential Traffic'])
-    
+    monthly_projections = pd.DataFrame()
+
     for month, rate in zip(range(1, 25), monthly_rates):  # 24 months
         if scenario == scenarios[0]: # Improve rankings by X positions
-            data['Adjusted Ranking Position'] = data['Current Ranking Position'] - (data['Current Ranking Position'] - max(data['Current Ranking Position'] - 1, 1)) * rate
+            data['Adjusted Ranking Position'] = np.maximum(data['Current Ranking Position'] - (data['Current Ranking Position'] - 1) * rate, 1)
         elif scenario == scenarios[1]: # Improve all rankings by 10%
-            data['Adjusted Ranking Position'] = data['Current Ranking Position'] - (data['Current Ranking Position'] - max(data['Current Ranking Position'] * 0.9, 1)) * rate
+            data['Adjusted Ranking Position'] = np.maximum(data['Current Ranking Position'] - (data['Current Ranking Position'] * 0.9) * rate, 1)
         elif scenario == scenarios[2]: # Lift all to random page 2 position
-            data['Adjusted Ranking Position'] = data['Current Ranking Position'] - (data['Current Ranking Position'] - max(random.randint(11,20), 1)) * rate
+            data['Adjusted Ranking Position'] = np.maximum(data['Current Ranking Position'] - (data['Current Ranking Position'] - random.randint(11,20)) * rate, 1)
         elif scenario == scenarios[3]: # Lift all to random page 1 position
-            data['Adjusted Ranking Position'] = data['Current Ranking Position'] - (data['Current Ranking Position'] - max(random.randint(1,10), 1)) * rate
+            data['Adjusted Ranking Position'] = np.maximum(data['Current Ranking Position'] - (data['Current Ranking Position'] - random.randint(1,10)) * rate, 1)
         elif scenario == scenarios[4]: # Lift all to position 1
-            data['Adjusted Ranking Position'] = data['Current Ranking Position'] - (data['Current Ranking Position'] - 1) * rate
+            data['Adjusted Ranking Position'] = np.maximum(data['Current Ranking Position'] - (data['Current Ranking Position'] - 1) * rate, 1)
 
-        data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: avg_ctr_by_position.get(min(round(max(1, x)), 10), 0))
+        data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: avg_ctr_by_position.get(min(round(x), 10), 0))
         data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
         
-        monthly_projections = monthly_projections.append({
-            'Month': month,
-            'Total Potential Traffic': data['Potential Traffic'].sum()
-        }, ignore_index=True)
+        new_monthly_projection = pd.DataFrame({
+            'Month': [month],
+            'Total Potential Traffic': [data['Potential Traffic'].sum()]
+        })
         
+        monthly_projections = monthly_projections.append(new_monthly_projection, ignore_index=True)
+
     return monthly_projections
 
 def main():
