@@ -39,7 +39,7 @@ def get_ctr_by_position():
 
 # Calculate potential traffic based on scenario
 def calculate_potential_traffic_based_on_scenario(data, scenario, avg_ctr_by_position, monthly_rates):
-    monthly_projections = pd.DataFrame()
+    monthly_projections = pd.DataFrame(columns=['Month', 'Total Potential Traffic'])
     
     for month, rate in zip(range(1, 25), monthly_rates):  # 24 months
         if scenario == scenarios[0]: # Improve rankings by X positions
