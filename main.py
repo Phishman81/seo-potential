@@ -30,7 +30,7 @@ def main():
             monthly_rates = [0.05, 0.07, 0.09, 0.10, 0.12, 0.14, 0.16, 0.20, 0.24, 0.28, 0.30, 0.35, 0.40, 0.44, 0.48, 0.52, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 1.00]
 
             # Initialize the monthly_projections DataFrame
-            monthly_projections = pd.DataFrame(columns=['Month', 'Total Potential Traffic'])
+            monthly_projections = pd.DataFrame()
 
             # Calculate the potential traffic for each scenario
             for month, rate in zip(range(1, 25), monthly_rates):
@@ -48,7 +48,7 @@ def main():
                 data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: avg_ctr_by_position.get(min(round(x), 10), 0))
                 data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
                 
-                monthly_projection = pd.DataFrame({'Month': [month], 'Total Potential Traffic': [data['Potential Traffic'].sum()]})
+                monthly_projection = {'Month': month, 'Total Potential Traffic': data['Potential Traffic'].sum()}
 
                 monthly_projections = monthly_projections.append(monthly_projection, ignore_index=True)
 
@@ -56,4 +56,4 @@ def main():
             st.dataframe(monthly_projections)
 
 if __name__ == "__main__":
-    main() 
+    main()
