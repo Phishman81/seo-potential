@@ -115,7 +115,7 @@ if uploaded_file is not None:
         conversion_value = st.number_input('Average value of a conversion in €', value=0.0)
 
         # Data processing button
-        if st.button('Run analysis'):
+    if st.button('Run analysis', key='run_analysis_button'):
             data['Search Intent'] = data['Search Intent'].apply(lambda x: conversion_rate_ranges.get(x, (0, 0)))
             data['Conversion Rate'] = data.apply(lambda row: np.random.uniform(row['Search Intent'][0], row['Search Intent'][1]) / 100, axis=1)
 
@@ -126,7 +126,7 @@ if uploaded_file is not None:
             success_scenario = project_success_scenarios[success]
     
             # Iterate over each month in the success scenario
-    if st.button('Run analysis'):
+    if st.button('Run analysis', key='run_analysis_button'):
         for i, success_rate in enumerate(success_scenario):
             month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
             all_data = pd.concat([all_data, month_data])
@@ -143,7 +143,7 @@ if uploaded_file is not None:
             href = f'<a href="data:file/csv;base64,{b64}" download="analysis_output.csv">Download CSV File</a>'
             st.markdown(href, unsafe_allow_html=True)
                 # Calculate potential traffic
-    if st.button('Run analysis'):
+    if st.button('Run analysis', key='run_analysis_button'):
         for i, success_rate in enumerate(success_scenario):
             month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
             all_data = pd.concat([all_data, month_data])
@@ -168,7 +168,7 @@ if uploaded_file is not None:
             st.markdown(href, unsafe_allow_html=True)
         
                 # Store month data
-    if st.button('Run analysis'):
+    if st.button('Run analysis', key='run_analysis_button'):
         for i, success_rate in enumerate(success_scenario):
             month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
             all_data = pd.concat([all_data, month_data])
