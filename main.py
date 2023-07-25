@@ -81,7 +81,7 @@ def calculate_potential_traffic(data, scenario, success, conversion_value):
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: 1)
 
     data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: avg_ctr_by_position.get(min(round(max(1, x)), 10), 0))
-    data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume per Keyword']
+    data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume']
     data['Potential Conversion'] = data['Potential Traffic'] * data['Conversion Rate']
     data['Potential Conversion Value'] = data['Potential Conversion'] * conversion_value
     data['Success Scenario'] = success
