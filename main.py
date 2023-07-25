@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import random
+import base64 
 
 # Set average CTR values by position
 avg_ctr_by_position = {1: (30, 35), 2: (15, 18), 3: (10, 12), 4: (7, 9), 5: (5, 7), 6: (4, 6), 7: (3, 5),
@@ -65,7 +66,7 @@ def validate_csv(file):
             return False, column
     return True, ""
 
-def calculate_potential_traffic(data, scenario, success, conversion_value):
+def calculate_potential_traffic(data, scenario, success, conversion_value, month):  # Modification
     """
     Calculate the potential traffic for each keyword cluster.
     """
@@ -85,6 +86,8 @@ def calculate_potential_traffic(data, scenario, success, conversion_value):
     data['Potential Conversion'] = data['Potential Traffic'] * data['Conversion Rate']
     data['Potential Conversion Value'] = data['Potential Conversion'] * conversion_value
     data['Success Scenario'] = success
+    data['Month'] = month  # Modification
+
     return data
 
 # App title
@@ -106,29 +109,25 @@ if uploaded_file is not None:
         st.write(data)
 
         # Dropdowns and selectors
-        cluster = st.multiselect('Cluster for improvement', data['Cluster'].unique().tolist() + ['all keywords'])
-        scenario = st.selectbox('Ranking Scenario', scenarios)
-        success = st.selectbox('Project Success', list(project_success_scenarios.keys()))
-        conversion_value = st.number_input('Average value of a conversion in €', value=0.0)
+        scenario = st.selectbox('Select the ranking improvement scenario:', scenarios)
+        success_scenario = st.selectbox('Select the project success scenario:', list(project_success_scenarios.keys()))
+        search_intent = st.selectbox('Select the search intent:', list(conversion_rate_ranges.keys()))
+        conversion_value = st.number_input('Enter the average conversion value (£):')
 
         # Data processing button
         if st.button('Run analysis'):
-            data['Search Intent'] = data['Search Intent'].apply(lambda x: conversion_rate_ranges.get(x, (0, 0)))
-            data['Conversion Rate'] = data.apply(lambda row: np.random.uniform(row['Search Intent'][0], row['Search Intent'][1]) / 100, axis=1)
+            data['Conversion Rate'] = data['Search Intent'].apply(lambda x: np.random.uniform(conversion_rate_ranges.get(x, 0)))
+            total_output_data = pd.DataFrame()  # Modification
 
-            # Subset the data if a cluster is selected
-            if 'all keywords' not in cluster:
-                data = data[data['Cluster'].isin(cluster)]
-
-            success_scenario = project_success_scenarios[success]
-    
-            # Iterate over each month in the success scenario
-            for i, success_rate in enumerate(success_scenario):
+            for i, success_rate in enumerate(project_success_scenarios[success_scenario]):
                 # Calculate potential traffic
-                month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
-        
-                # Store month data
-                month_data.to_csv(f'output_month_{i+1}.csv', index=False)
+                month_data = calculate_potential_traffic(data.copy(), scenario, success_rate, conversion_value, i + 1)  # Modification
+                total_output_data = pd.concat([total_output_data, month_data])  # Modification
 
-            st.success('Analysis complete. Please check your directory for the output files.')
+            st.write(total_output_data)  # Modification
 
+            # Encode DataFrame to CSV and create a download link
+            csv = total_output_data.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()  
+            href = f'<a href="data:file/csv;base64,{b64}" download="output.csv">Download CSV File</a>'
+            st.markdown(href, unsafe_allow_html=True)  # Modification
