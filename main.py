@@ -131,6 +131,7 @@ if uploaded_file is not None:
                 month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
         
                 # Store month data
+        month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
         all_data = pd.concat([all_data, month_data])
 
         st.dataframe(all_data)
