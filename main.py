@@ -126,18 +126,24 @@ if uploaded_file is not None:
             success_scenario = project_success_scenarios[success]
     
             # Iterate over each month in the success scenario
-                for i, success_rate in enumerate(success_scenario):
+    for i, success_rate in enumerate(success_scenario):
+        month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
+        all_data = pd.concat([all_data, month_data])
                     month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
                     all_data = pd.concat([all_data, month_data])
                 # Calculate potential traffic
-                for i, success_rate in enumerate(success_scenario):
+    for i, success_rate in enumerate(success_scenario):
+        month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
+        all_data = pd.concat([all_data, month_data])
                     month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
                     all_data = pd.concat([all_data, month_data])
                 month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
                 all_data = pd.concat([all_data, month_data])
         
                 # Store month data
-                for i, success_rate in enumerate(success_scenario):
+    for i, success_rate in enumerate(success_scenario):
+        month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
+        all_data = pd.concat([all_data, month_data])
                     month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
                     all_data = pd.concat([all_data, month_data])
                 month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
