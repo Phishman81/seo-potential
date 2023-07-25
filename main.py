@@ -126,29 +126,77 @@ if uploaded_file is not None:
             success_scenario = project_success_scenarios[success]
     
             # Iterate over each month in the success scenario
-    for i, success_rate in enumerate(success_scenario):
-        month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
-        all_data = pd.concat([all_data, month_data])
-        month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
-        all_data = pd.concat([all_data, month_data])
+    if st.button('Run analysis'):
+        for i, success_rate in enumerate(success_scenario):
+            month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
+            all_data = pd.concat([all_data, month_data])
+            st.dataframe(all_data)
+            csv = all_data.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()
+            href = f'<a href="data:file/csv;base64,{b64}" download="analysis_output.csv">Download CSV File</a>'
+            st.markdown(href, unsafe_allow_html=True)
+            month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
+            all_data = pd.concat([all_data, month_data])
+            st.dataframe(all_data)
+            csv = all_data.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()
+            href = f'<a href="data:file/csv;base64,{b64}" download="analysis_output.csv">Download CSV File</a>'
+            st.markdown(href, unsafe_allow_html=True)
                 # Calculate potential traffic
-    for i, success_rate in enumerate(success_scenario):
-        month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
-        all_data = pd.concat([all_data, month_data])
-        month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
-        all_data = pd.concat([all_data, month_data])
-        month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
-        all_data = pd.concat([all_data, month_data])
+    if st.button('Run analysis'):
+        for i, success_rate in enumerate(success_scenario):
+            month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
+            all_data = pd.concat([all_data, month_data])
+            st.dataframe(all_data)
+            csv = all_data.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()
+            href = f'<a href="data:file/csv;base64,{b64}" download="analysis_output.csv">Download CSV File</a>'
+            st.markdown(href, unsafe_allow_html=True)
+            month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
+            all_data = pd.concat([all_data, month_data])
+            st.dataframe(all_data)
+            csv = all_data.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()
+            href = f'<a href="data:file/csv;base64,{b64}" download="analysis_output.csv">Download CSV File</a>'
+            st.markdown(href, unsafe_allow_html=True)
+            month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
+            all_data = pd.concat([all_data, month_data])
+            st.dataframe(all_data)
+            csv = all_data.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()
+            href = f'<a href="data:file/csv;base64,{b64}" download="analysis_output.csv">Download CSV File</a>'
+            st.markdown(href, unsafe_allow_html=True)
         
                 # Store month data
-    for i, success_rate in enumerate(success_scenario):
-        month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
-        all_data = pd.concat([all_data, month_data])
-        month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
-        all_data = pd.concat([all_data, month_data])
-        month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
-        all_data = pd.concat([all_data, month_data])
-        all_data = pd.concat([all_data, month_data])
+    if st.button('Run analysis'):
+        for i, success_rate in enumerate(success_scenario):
+            month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
+            all_data = pd.concat([all_data, month_data])
+            st.dataframe(all_data)
+            csv = all_data.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()
+            href = f'<a href="data:file/csv;base64,{b64}" download="analysis_output.csv">Download CSV File</a>'
+            st.markdown(href, unsafe_allow_html=True)
+            month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
+            all_data = pd.concat([all_data, month_data])
+            st.dataframe(all_data)
+            csv = all_data.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()
+            href = f'<a href="data:file/csv;base64,{b64}" download="analysis_output.csv">Download CSV File</a>'
+            st.markdown(href, unsafe_allow_html=True)
+            month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
+            all_data = pd.concat([all_data, month_data])
+            st.dataframe(all_data)
+            csv = all_data.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()
+            href = f'<a href="data:file/csv;base64,{b64}" download="analysis_output.csv">Download CSV File</a>'
+            st.markdown(href, unsafe_allow_html=True)
+            all_data = pd.concat([all_data, month_data])
+            st.dataframe(all_data)
+            csv = all_data.to_csv(index=False)
+            b64 = base64.b64encode(csv.encode()).decode()
+            href = f'<a href="data:file/csv;base64,{b64}" download="analysis_output.csv">Download CSV File</a>'
+            st.markdown(href, unsafe_allow_html=True)
 
         st.dataframe(all_data)
         csv = all_data.to_csv(index=False)
