@@ -93,7 +93,7 @@ st.title('SEO Potential Analyzer')
 st.write('Please upload a CSV file containing the following columns: Keyword, Cluster, Search Intent, Monthly Search Volume, Current Clicks per Month, Current Ranking Position, and Current CTR.')
 
 # CSV file upload
-uploaded_file = st.file_uploader('')
+uploaded_file = st.file_uploader('Upload CSV File')
 
 all_data = pd.DataFrame()
 
