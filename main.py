@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import random
+import base64
 
 # Set average CTR values by position
 avg_ctr_by_position = {1: (30, 35), 2: (15, 18), 3: (10, 12), 4: (7, 9), 5: (5, 7), 6: (4, 6), 7: (3, 5),
@@ -94,6 +95,8 @@ st.write('Please upload a CSV file containing the following columns: Keyword, Cl
 # CSV file upload
 uploaded_file = st.file_uploader('')
 
+all_data = pd.DataFrame()
+
 if uploaded_file is not None:
     data = pd.read_csv(uploaded_file)
 
@@ -128,6 +131,10 @@ if uploaded_file is not None:
                 month_data = calculate_potential_traffic(data, scenario, success_rate, conversion_value)
         
                 # Store month data
-                month_data.to_csv(f'output_month_{i+1}.csv', index=False)
+        all_data = pd.concat([all_data, month_data])
 
-            st.success('Analysis complete. Please check your directory for the output files.')
+        st.dataframe(all_data)
+        csv = all_data.to_csv(index=False)
+        b64 = base64.b64encode(csv.encode()).decode()
+        href = f'<a href="data:file/csv;base64,{b64}" download="analysis_output.csv">Download CSV File</a>'
+        st.markdown(href, unsafe_allow_html=True)
