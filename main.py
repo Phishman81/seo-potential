@@ -12,6 +12,16 @@ def load_data(file):
     else:
         return None
 
+def calculate_ctr(position):
+    if position == 1:
+        return 0.35
+    elif position <= 3:
+        return 0.15
+    elif position <= 10:
+        return 0.10
+    else:
+        return 0.05
+
 def calculate_potential_data(data, ranking_scenario, avg_conversion_value):
     scenarios = ["improve rankings by 1 position", "improve all rankings by 10%", "improve all rankings to position 1"]
     if ranking_scenario == scenarios[0]:
@@ -21,7 +31,7 @@ def calculate_potential_data(data, ranking_scenario, avg_conversion_value):
     elif ranking_scenario == scenarios[2]:
         data['Adjusted Ranking Position'] = data['Current Ranking Position'].apply(lambda x: 1)
 
-    data['Potential CTR'] = data['Adjusted Ranking Position'].apply(lambda x: 0.3 if x == 1 else 0.1)
+    data['Potential CTR'] = data['Adjusted Ranking Position'].apply(calculate_ctr)
     data['Potential Traffic'] = data['Potential CTR'] * data['Monthly Search Volume']
 
     return data
