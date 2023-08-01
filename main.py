@@ -35,10 +35,10 @@ def get_ctr(position):
 
 # Project duration scenarios
 project_duration_scenarios = {
-    "6 months": {f'Month {i}': val for i, val in enumerate([15, 35, 65, 74, 87, 100])},
-    "12 months": {f'Month {i}': val for i, val in enumerate([1, 3, 5, 8, 12, 25, 40, 55, 70, 78, 85, 100])},
-    "18 months": {f'Month {i}': val for i, val in enumerate([2, 5, 8, 12, 18, 35, 42, 54, 67, 72, 77, 81, 87, 90, 93, 95, 97, 100])},
-    "24 months": {f'Month {i}': val for i, val in enumerate([2, 5, 8, 12, 18, 35, 55, 62, 66, 72, 77, 83, 85, 88, 90, 91, 92, 93, 94, 95, 96, 98, 99, 100])},
+    "6 months": {f'Month {i+1}': val for i, val in enumerate([15, 35, 65, 74, 87, 100])},
+    "12 months": {f'Month {i+1}': val for i, val in enumerate([1, 3, 5, 8, 12, 25, 40, 55, 70, 78, 85, 100])},
+    "18 months": {f'Month {i+1}': val for i, val in enumerate([2, 5, 8, 12, 18, 35, 42, 54, 67, 72, 77, 81, 87, 90, 93, 95, 97, 100])},
+    "24 months": {f'Month {i+1}': val for i, val in enumerate([2, 5, 8, 12, 18, 35, 55, 62, 66, 72, 77, 83, 85, 88, 90, 91, 92, 93, 94, 95, 96, 98, 99, 100])},
 }
 
 st.title('SEO Potential Analyzer')
