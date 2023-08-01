@@ -1,10 +1,27 @@
 import streamlit as st
 import pandas as pd
-import random
 import numpy as np
-import matplotlib.pyplot as plt
+import random
 
-# Define CTR ranges for each position
+# Define the ranking scenarios
+ranking_scenarios = {
+    'improve each ranking by 1 position': lambda x: x-1 if x > 1 else x,
+    'lift all positions > 20 to random page 2 positions': lambda x: random.randint(11,20) if x > 20 else x,
+    'lift all rankings to random positions 2-5': lambda x: random.randint(2,5) if x > 5 else x,
+    'lift all rankings to random positions 1-3': lambda x: random.randint(1,3) if x > 3 else x,
+    'lift all to random page 1 positions': lambda x: random.randint(1,10) if x > 10 else x,
+    'lift all to position 1': lambda x: 1 if x != 1 else x
+}
+
+# Define the project duration scenarios
+project_duration_scenarios = {
+    "6 months scenario": [15,35, 65, 74, 87, 100],
+    "12 month scenario": [1, 3, 5, 8, 12, 25, 40, 55, 70, 78, 85, 100],
+    "18 month scenario": [2, 5, 8, 12, 18, 35, 42, 54, 67, 72, 77, 81, 87, 90, 93, 95,97,100],
+    "24 month scenario": [2, 5, 8, 12, 18, 35, 55, 62, 66, 72, 77, 83, 85, 88,90, 91,92,93,94,95,96,98,99,100]
+}
+
+# Define the CTR ranges for each position
 ctr_ranges = {
     range(1, 2): (30, 35),
     range(2, 3): (15, 18),
@@ -26,73 +43,45 @@ ctr_ranges = {
     range(91, 101): (0.1, 0.2)
 }
 
-# Function to get CTR for a given position
-def get_ctr(position):
-    for r in ctr_ranges:
-        if position in r:
-            return random.uniform(ctr_ranges[r][0], ctr_ranges[r][1])
-    return 0
+# Create the app title and instructions
+st.title("SEO Potential Analyzer")
+st.write("Please upload a CSV file with at least the following columns: Keyword, Search Volume, Clicks, Position")
 
-# Project duration scenarios
-project_duration_scenarios = {
-    "6 months": {f'Month {i+1}': val for i, val in enumerate([15, 35, 65, 74, 87, 100])},
-    "12 months": {f'Month {i+1}': val for i, val in enumerate([1, 3, 5, 8, 12, 25, 40, 55, 70, 78, 85, 100])},
-    "18 months": {f'Month {i+1}': val for i, val in enumerate([2, 5, 8, 12, 18, 35, 42, 54, 67, 72, 77, 81, 87, 90, 93, 95, 97, 100])},
-    "24 months": {f'Month {i+1}': val for i, val in enumerate([2, 5, 8, 12, 18, 35, 55, 62, 66, 72, 77, 83, 85, 88, 90, 91, 92, 93, 94, 95, 96, 98, 99, 100])},
-}
-
-st.title('SEO Potential Analyzer')
-st.write('Upload a CSV file containing at least the following columns: Keyword, Search Volume, Clicks, Position')
-
+# Create the file uploader and read the uploaded file
 uploaded_file = st.file_uploader("Upload CSV", type=['csv'])
-
 if uploaded_file is not None:
-    data = pd.read_csv(uploaded_file)
-    columns = data.columns.tolist()
+    data = pd.read_csv(uploaded_file, error_bad_lines=False)
 
-    # Check if required columns are present
-    required_columns = ['Keyword', 'Search Volume', 'Clicks', 'Position']
-    if all(item in columns for item in required_columns):
-        data = data[required_columns]
-        st.write(data)
-    else:
-        st.error('The uploaded CSV file does not contain the required columns.')
-        st.stop()
+# Check that the required columns are present
+required_columns = {'Keyword', 'Search Volume', 'Clicks', 'Position'}
+if set(data.columns) & required_columns == required_columns:
+    data = data[list(required_columns)]
 
-    scenario = st.selectbox('Ranking Scenario', options = ['Improve rankings by 1 position', 'Lift all to random page 2 position', 
-    'Lift all rankings to random positions 2-5', 'Lift all rankings to random positions 1-3', 
-    'Lift all to random page 1 positions', 'Lift all to position 1'])
+    # Get user input for ranking scenario, project duration and average conversion rate
+    scenario = st.selectbox("Ranking Scenario", list(ranking_scenarios.keys()))
+    duration = st.selectbox("Project Duration", list(project_duration_scenarios.keys()))
+    avg_conv_rate = st.number_input("Average Conversion Rate %", min_value=0.0, max_value=100.0)
 
-    if scenario == 'Improve rankings by 1 position':
-        data['Future Position'] = data['Position'].apply(lambda x: x-1 if x > 1 else x)
-    
-    elif scenario == 'Lift all to random page 2 position':
-        data['Future Position'] = data['Position'].apply(lambda x: random.randint(11,20) if x > 20 else x)
-        
-    # Add your own scenarios here...
+    # Define a button to start the analysis
+    if st.button('Start Analysis'):
+        # Apply the selected ranking scenario to calculate the future position
+        data['Future Position'] = data['Position'].apply(ranking_scenarios[scenario])
+        # Calculate the CTR for the future position
+        data['Future CTR'] = data['Future Position'].apply(lambda x: np.mean(ctr_ranges[next((r for r in ctr_ranges if x in r), range(91, 101))]) / 100)
+        # Calculate the future clicks based on the future CTR and search volume
+        data['Future Clicks'] = (data['Search Volume'] * data['Future CTR']).astype(int)
+        # Calculate the current and future conversions based on the clicks and average conversion rate
+        data['Current Conversions'] = (data['Clicks'] * (avg_conv_rate / 100)).astype(int)
+        data['Future Conversions'] = (data['Future Clicks'] * (avg_conv_rate / 100)).astype(int)
+        # Calculate the additional conversions and additional revenue
+        data['Additional Conversions'] = data['Future Conversions'] - data['Current Conversions']
 
-    duration = st.selectbox('Project Duration', options = list(project_duration_scenarios.keys()))
+        # Calculate the clicks for each month
+        for month, percentage in enumerate(project_duration_scenarios[duration], start=1):
+            data[f'Month {month}'] = (data['Clicks'] + (data['Future Clicks'] - data['Clicks']) * (percentage / 100)).astype(int)
 
-    conversion_rate = st.number_input('Average Conversion Rate %', min_value=0.0, max_value=100.0, step=0.01)
-    data['Current Conversions'] = data['Clicks'] * conversion_rate / 100
+        # Display the resulting DataFrame
+        st.dataframe(data)
 
-    run_button = st.button('Run Analysis')
-    
-    if run_button:
-        # Calculate future data
-        data['Future CTR'] = data['Future Position'].apply(get_ctr)
-        data['Future Clicks'] = data['Search Volume'] * data['Future CTR'] / 100
-        data['Future Conversions'] = data['Future Clicks'] * conversion_rate / 100
-
-        # Calculate clicks for each month
-        scenario_data = project_duration_scenarios[duration]
-        for month, improvement in scenario_data.items():
-            data[month] = data['Future Clicks'] * (1 + improvement / 100)
-
-        # Display the data
-        st.write(data)
-
-        # Plot the graphs
-        st.bar_chart(data[['Clicks', 'Future Clicks']])
-        st.bar_chart(data[['Current Conversions', 'Future Conversions']])
-        st.line_chart(data['Future Clicks'].cumsum())
+else:
+    st.error("The uploaded file doesn't contain the required columns.")
