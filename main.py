@@ -79,14 +79,15 @@ if uploaded_file is not None:
     run_button = st.button('Run Analysis')
     
     if run_button:
-        scenario_data = project_duration_scenarios[duration]
-        for month, improvement in scenario_data.items():
-            data[month] = data['Future Position'] * (1 + improvement / 100)
-
         # Calculate future data
         data['Future CTR'] = data['Future Position'].apply(get_ctr)
         data['Future Clicks'] = data['Search Volume'] * data['Future CTR'] / 100
         data['Future Conversions'] = data['Future Clicks'] * conversion_rate / 100
+
+        # Calculate clicks for each month
+        scenario_data = project_duration_scenarios[duration]
+        for month, improvement in scenario_data.items():
+            data[month] = data['Future Clicks'] * (1 + improvement / 100)
 
         # Display the data
         st.write(data)
