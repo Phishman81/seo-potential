@@ -35,14 +35,17 @@ def get_ctr(position):
 
 # Project duration scenarios
 project_duration_scenarios = {
-    "6 months": [15, 35, 65, 74, 87, 100],
-    "12 months": [1, 3, 5, 8, 12, 25, 40, 55, 70, 78, 85, 100],
-    "18 months": [2, 5, 8, 12, 18, 35, 42, 54, 67, 72, 77, 81, 87, 90, 93, 95, 97, 100],
-    "24 months": [2, 5, 8, 12, 18, 35, 55, 62, 66, 72, 77, 83, 85, 88, 90, 91, 92, 93, 94, 95, 96, 98, 99, 100],
+    "6 months": pd.Series([15, 35, 65, 74, 87, 100], 
+                          index=pd.date_range(start='2023-01-01', periods=6, freq='M')),
+    "12 months": pd.Series([1, 3, 5, 8, 12, 25, 40, 55, 70, 78, 85, 100], 
+                           index=pd.date_range(start='2023-01-01', periods=12, freq='M')),
+    "18 months": pd.Series([2, 5, 8, 12, 18, 35, 42, 54, 67, 72, 77, 81, 87, 90, 93, 95, 97, 100], 
+                           index=pd.date_range(start='2023-01-01', periods=18, freq='M')),
+    "24 months": pd.Series([2, 5, 8, 12, 18, 35, 55, 62, 66, 72, 77, 83, 85, 88, 90, 91, 92, 93, 94, 95, 96, 98, 99, 100], 
+                           index=pd.date_range(start='2023-01-01', periods=24, freq='M')),
 }
 
 st.title('SEO Potential Analyzer')
-
 st.write('Upload a CSV file containing at least the following columns: Keyword, Search Volume, Clicks, Position')
 
 uploaded_file = st.file_uploader("Upload CSV", type=['csv'])
@@ -73,7 +76,6 @@ if uploaded_file is not None:
     # Add your own scenarios here...
 
     duration = st.selectbox('Project Duration', options = list(project_duration_scenarios.keys()))
-    data['Project Duration'] = project_duration_scenarios[duration]
 
     conversion_rate = st.number_input('Average Conversion Rate %', min_value=0.0, max_value=100.0, step=0.01)
     data['Current Conversions'] = data['Clicks'] * conversion_rate / 100
@@ -81,6 +83,11 @@ if uploaded_file is not None:
     run_button = st.button('Run Analysis')
     
     if run_button:
+        scenario_data = project_duration_scenarios[duration]
+        data = data.assign(key=1).merge(scenario_data.reset_index().assign(key=1), on='key').drop('key', axis=1)
+        data = data.rename(columns={0: 'Improvement', 'index': 'Date'})
+        data['Future Position'] = data['Future Position'] * (1 + data['Improvement'] / 100)
+
         # Calculate future data
         data['Future CTR'] = data['Future Position'].apply(get_ctr)
         data['Future Clicks'] = data['Search Volume'] * data['Future CTR'] / 100
@@ -90,6 +97,6 @@ if uploaded_file is not None:
         st.write(data)
 
         # Plot the graphs
-        st.bar_chart(data[['Clicks', 'Future Clicks']])
-        st.bar_chart(data[['Current Conversions', 'Future Conversions']])
-        st.line_chart(data['Future Clicks'].cumsum())
+        st.bar_chart(data.groupby('Date')[['Clicks', 'Future Clicks']].sum())
+        st.bar_chart(data.groupby('Date')[['Current Conversions', 'Future Conversions']].sum())
+        st.line_chart(data.groupby('Date')['Future Clicks'].sum())
