@@ -35,14 +35,10 @@ def get_ctr(position):
 
 # Project duration scenarios
 project_duration_scenarios = {
-    "6 months": pd.Series([15, 35, 65, 74, 87, 100], 
-                          index=pd.date_range(start='2023-01-01', periods=6, freq='M')),
-    "12 months": pd.Series([1, 3, 5, 8, 12, 25, 40, 55, 70, 78, 85, 100], 
-                           index=pd.date_range(start='2023-01-01', periods=12, freq='M')),
-    "18 months": pd.Series([2, 5, 8, 12, 18, 35, 42, 54, 67, 72, 77, 81, 87, 90, 93, 95, 97, 100], 
-                           index=pd.date_range(start='2023-01-01', periods=18, freq='M')),
-    "24 months": pd.Series([2, 5, 8, 12, 18, 35, 55, 62, 66, 72, 77, 83, 85, 88, 90, 91, 92, 93, 94, 95, 96, 98, 99, 100], 
-                           index=pd.date_range(start='2023-01-01', periods=24, freq='M')),
+    "6 months": {f'Month {i}': val for i, val in enumerate([15, 35, 65, 74, 87, 100])},
+    "12 months": {f'Month {i}': val for i, val in enumerate([1, 3, 5, 8, 12, 25, 40, 55, 70, 78, 85, 100])},
+    "18 months": {f'Month {i}': val for i, val in enumerate([2, 5, 8, 12, 18, 35, 42, 54, 67, 72, 77, 81, 87, 90, 93, 95, 97, 100])},
+    "24 months": {f'Month {i}': val for i, val in enumerate([2, 5, 8, 12, 18, 35, 55, 62, 66, 72, 77, 83, 85, 88, 90, 91, 92, 93, 94, 95, 96, 98, 99, 100])},
 }
 
 st.title('SEO Potential Analyzer')
@@ -84,9 +80,8 @@ if uploaded_file is not None:
     
     if run_button:
         scenario_data = project_duration_scenarios[duration]
-        data = data.assign(key=1).merge(scenario_data.reset_index().assign(key=1), on='key').drop('key', axis=1)
-        data = data.rename(columns={0: 'Improvement', 'index': 'Date'})
-        data['Future Position'] = data['Future Position'] * (1 + data['Improvement'] / 100)
+        for month, improvement in scenario_data.items():
+            data[month] = data['Future Position'] * (1 + improvement / 100)
 
         # Calculate future data
         data['Future CTR'] = data['Future Position'].apply(get_ctr)
@@ -97,6 +92,6 @@ if uploaded_file is not None:
         st.write(data)
 
         # Plot the graphs
-        st.bar_chart(data.groupby('Date')[['Clicks', 'Future Clicks']].sum())
-        st.bar_chart(data.groupby('Date')[['Current Conversions', 'Future Conversions']].sum())
-        st.line_chart(data.groupby('Date')['Future Clicks'].sum())
+        st.bar_chart(data[['Clicks', 'Future Clicks']])
+        st.bar_chart(data[['Current Conversions', 'Future Conversions']])
+        st.line_chart(data['Future Clicks'].cumsum())
