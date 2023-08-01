@@ -50,38 +50,42 @@ st.write("Please upload a CSV file with at least the following columns: Keyword,
 # Create the file uploader and read the uploaded file
 uploaded_file = st.file_uploader("Upload CSV", type=['csv'])
 if uploaded_file is not None:
-    data = pd.read_csv(uploaded_file, error_bad_lines=False)
+    try:
+        data = pd.read_csv(uploaded_file, error_bad_lines=False)
+    except Exception as e:
+        st.error(f"Error reading file: {e}")
 
-# Check that the required columns are present
-required_columns = {'Keyword', 'Search Volume', 'Clicks', 'Position'}
-if set(data.columns) & required_columns == required_columns:
-    data = data[list(required_columns)]
+if 'data' in locals():
+    # Check that the required columns are present
+    required_columns = {'Keyword', 'Search Volume', 'Clicks', 'Position'}
+    if set(data.columns) & required_columns == required_columns:
+        data = data[list(required_columns)]
 
-    # Get user input for ranking scenario, project duration and average conversion rate
-    scenario = st.selectbox("Ranking Scenario", list(ranking_scenarios.keys()))
-    duration = st.selectbox("Project Duration", list(project_duration_scenarios.keys()))
-    avg_conv_rate = st.number_input("Average Conversion Rate %", min_value=0.0, max_value=100.0)
+        # Get user input for ranking scenario, project duration and average conversion rate
+        scenario = st.selectbox("Ranking Scenario", list(ranking_scenarios.keys()))
+        duration = st.selectbox("Project Duration", list(project_duration_scenarios.keys()))
+        avg_conv_rate = st.number_input("Average Conversion Rate %", min_value=0.0, max_value=100.0)
 
-    # Define a button to start the analysis
-    if st.button('Start Analysis'):
-        # Apply the selected ranking scenario to calculate the future position
-        data['Future Position'] = data['Position'].apply(ranking_scenarios[scenario])
-        # Calculate the CTR for the future position
-        data['Future CTR'] = data['Future Position'].apply(lambda x: np.mean(ctr_ranges[next((r for r in ctr_ranges if x in r), range(91, 101))]) / 100)
-        # Calculate the future clicks based on the future CTR and search volume
-        data['Future Clicks'] = (data['Search Volume'] * data['Future CTR']).astype(int)
-        # Calculate the current and future conversions based on the clicks and average conversion rate
-        data['Current Conversions'] = (data['Clicks'] * (avg_conv_rate / 100)).astype(int)
-        data['Future Conversions'] = (data['Future Clicks'] * (avg_conv_rate / 100)).astype(int)
-        # Calculate the additional conversions and additional revenue
-        data['Additional Conversions'] = data['Future Conversions'] - data['Current Conversions']
+        # Define a button to start the analysis
+        if st.button('Start Analysis'):
+            # Apply the selected ranking scenario to calculate the future position
+            data['Future Position'] = data['Position'].apply(ranking_scenarios[scenario])
+            # Calculate the CTR for the future position
+            data['Future CTR'] = data['Future Position'].apply(lambda x: np.mean(ctr_ranges[next((r for r in ctr_ranges if x in r), range(91, 101))]) / 100)
+            # Calculate the future clicks based on the future CTR and search volume
+            data['Future Clicks'] = (data['Search Volume'] * data['Future CTR']).astype(int)
+            # Calculate the current and future conversions based on the clicks and average conversion rate
+            data['Current Conversions'] = (data['Clicks'] * (avg_conv_rate / 100)).astype(int)
+            data['Future Conversions'] = (data['Future Clicks'] * (avg_conv_rate / 100)).astype(int)
+            # Calculate the additional conversions and additional revenue
+            data['Additional Conversions'] = data['Future Conversions'] - data['Current Conversions']
 
-        # Calculate the clicks for each month
-        for month, percentage in enumerate(project_duration_scenarios[duration], start=1):
-            data[f'Month {month}'] = (data['Clicks'] + (data['Future Clicks'] - data['Clicks']) * (percentage / 100)).astype(int)
+            # Calculate the clicks for each month
+            for month, percentage in enumerate(project_duration_scenarios[duration], start=1):
+                data[f'Month {month}'] = (data['Clicks'] + (data['Future Clicks'] - data['Clicks']) * (percentage / 100)).astype(int)
 
-        # Display the resulting DataFrame
-        st.dataframe(data)
+            # Display the resulting DataFrame
+            st.dataframe(data)
 
-else:
-    st.error("The uploaded file doesn't contain the required columns.")
+    else:
+        st.error("The uploaded file doesn't contain the required columns.")
