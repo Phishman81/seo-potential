@@ -51,7 +51,7 @@ st.write("Please upload a CSV file with at least the following columns: Keyword,
 uploaded_file = st.file_uploader("Upload CSV", type=['csv'])
 if uploaded_file is not None:
     try:
-        data = pd.read_csv(uploaded_file, error_bad_lines=False)
+        data = pd.read_csv(uploaded_file, on_bad_lines='warn')
     except Exception as e:
         st.error(f"Error reading file: {e}")
 
