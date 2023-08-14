@@ -1,96 +1,59 @@
 
 import streamlit as st
 import pandas as pd
-import numpy as np
-import random
 
-st.set_option('deprecation.showfileUploaderEncoding', False)
-
-# Define the ranking scenarios and project duration scenarios
-ranking_scenarios = {
-    'Improve each ranking by 1 position': lambda x: x-1 if x > 1 else x,
-    'Lift all positions > 20 to random page 2 positions': lambda x: random.randint(11,20) if x > 20 else x,
-    'Lift all rankings to random positions 2-5': lambda x: random.randint(2,5) if x > 5 else x,
-    'Lift all rankings to random positions 1-3': lambda x: random.randint(1,3) if x > 3 else x,
-    'Lift all to random page 1 positions': lambda x: random.randint(1,10) if x > 10 else x,
-    'Lift all to position 1': lambda x: 1 if x > 1 else x,
+# CTR-Bereiche
+ctr_ranges_adjusted = {
+    (0, 1.5): (0.30, 0.35),
+    (1.5, 2.5): (0.15, 0.18),
+    (2.5, 3.5): (0.10, 0.12),
+    (3.5, 4.5): (0.07, 0.09),
+    (4.5, 5.5): (0.05, 0.07),
+    (5.5, 6.5): (0.04, 0.06),
+    (6.5, 7.5): (0.03, 0.05),
+    (7.5, 8.5): (0.03, 0.04),
+    (8.5, 10.5): (0.02, 0.03),
+    (10.5, 20.5): (0.01, 0.02),
+    (20.5, 30.5): (0.005, 0.01),
+    (30.5, 40.5): (0.004, 0.008),
+    (40.5, 50.5): (0.003, 0.007),
+    (50.5, 60.5): (0.002, 0.006),
+    (60.5, 70.5): (0.002, 0.005),
+    (70.5, 80.5): (0.001, 0.004),
+    (80.5, 90.5): (0.001, 0.003),
+    (90.5, 100.5): (0.001, 0.002)
 }
 
-project_duration_scenarios = {
-    "6 months scenario": [15,35, 65, 74, 87, 100],
-    "12 month scenario": [1, 3, 5, 8, 12, 25, 40, 55, 70, 78, 85, 100],
-    "18 month scenario": [2, 5, 8, 12, 18, 35, 42, 54, 67, 72, 77, 81, 87, 90, 93, 95,97,100],
-    "24 month scenario": [2, 5, 8, 12, 18, 35, 55, 62, 66, 72, 77, 83, 85, 88,90, 91,92,93,94,95,96,98,99,100],
-}
+# Monatliche Verbesserungen
+monthly_improvements = [0.01, 0.04, 0.06, 0.09, 0.15, 0.27, 0.45, 0.57, 0.67, 0.70, 0.81, 1.00]
 
-ctr_ranges = {
-    range(1, 2): [30, 35],
-    range(2, 3): [15, 18],
-    range(3, 4): [10, 12],
-    range(4, 5): [7, 9],
-    range(5, 6): [5, 7],
-    range(6, 7): [4, 6],
-    range(7, 8): [3, 5],
-    range(8, 9): [3, 4],
-    range(9, 11): [2, 3],
-    range(11, 21): [1, 2],
-    range(21, 31): [0.5, 1],
-    range(31, 41): [0.4, 0.8],
-    range(41, 51): [0.3, 0.7],
-    range(51, 61): [0.2, 0.6],
-    range(61, 71): [0.2, 0.5],
-    range(71, 81): [0.1, 0.4],
-    range(81, 91): [0.1, 0.3],
-    range(91, 101): [0.1, 0.2]
-}
+# Funktion, um den durchschnittlichen CTR basierend auf der Position zu erhalten
+def get_avg_ctr_corrected(position):
+    for key, value in ctr_ranges_adjusted.items():
+        if key[0] <= position <= key[1]:
+            return (value[0] + value[1]) / 2
+    return 0
 
-# Streamlit app layout
-st.title("SEO Potential Analyzer")
-st.markdown("""
-Please upload a CSV file containing at least the following columns: 
-- Keyword
-- Search Volume
-- Clicks
-- Position
-""")
-uploaded_file = st.file_uploader("Choose a file")
+# Hauptfunktion der Streamlit-App
+def main():
+    st.title("Berechnung der monatlichen geschätzten Klicks")
 
-if uploaded_file is not None:
-    data = pd.read_csv(uploaded_file)
-    required_columns = {'Keyword', 'Search Volume', 'Clicks', 'Position'}
+    uploaded_file = st.file_uploader("Laden Sie Ihre CSV-Datei hoch", type=["csv"])
+    
+    if uploaded_file is not None:
+        data = pd.read_csv(uploaded_file)
+        
+        for month in range(1, 13):
+            data[f"Improvement Month {month} (in percent)"] = monthly_improvements[month - 1] * 100
+            data[f"Estimated Position Month {month}"] = data["Position"] - (data["Position"] - 1) * monthly_improvements[month - 1]
+            data[f"Estimated Clicks Month {month}"] = data['Avg. monthly searches'] * data[f"Estimated Position Month {month}"].apply(get_avg_ctr_corrected)
+        
+        st.write(data)
 
-    if set(data.columns) & required_columns != required_columns:
-        st.error('The uploaded file does not have the necessary columns.')
-    else:
-        data = data[list(required_columns)]
+        csv = data.to_csv(index=False)
+        b64 = b64 = base64.b64encode(csv.encode()).decode()
+        href = f'<a href="data:file/csv;base64,{b64}" download="estimated_clicks_monthly_details.csv">Download CSV File</a>'
+        st.markdown(href, unsafe_allow_html=True)
 
-        scenario = st.selectbox("Ranking Scenario", list(ranking_scenarios.keys()))
-        duration = st.selectbox("Project Duration", list(project_duration_scenarios.keys()))
-        avg_conv_rate = st.number_input("Average Conversion Rate %", 0.0, 100.0, 2.5, 0.1)
-
-        if st.button("Run Analysis"):
-            data['Future Position'] = data['Position'].apply(ranking_scenarios[scenario])
-            data['Future CTR'] = data['Future Position'].apply(lambda x: np.mean(ctr_ranges[next((r for r in ctr_ranges if x in r), range(91, 101))]) / 100)
-            data['Future Clicks'] = (data['Search Volume'] * data['Future CTR']).astype(int)
-            data['Current Conversions'] = (data['Clicks'] * (avg_conv_rate / 100)).astype(int)
-            data['Future Conversions'] = (data['Future Clicks'] * (avg_conv_rate / 100)).astype(int)
-
-            for month, percentage in enumerate(project_duration_scenarios[duration], start=1):
-                data[f'Month {month} Clicks'] = (data['Clicks'] + (data['Future Clicks'] - data['Clicks']) * (percentage / 100)).astype(int)
-
-            st.dataframe(data)
-
-            st.markdown("### Total Current Clicks")
-            st.bar_chart(data['Clicks'])
-
-            st.markdown("### Total Future Clicks")
-            st.bar_chart(data['Future Clicks'])
-
-            st.markdown("### Total Current Conversions")
-            st.bar_chart(data['Current Conversions'])
-
-            st.markdown("### Total Future Conversions")
-            st.bar_chart(data['Future Conversions'])
-
-            st.markdown("### Clicks Over Time")
-            st.line_chart(data[[f'Month {i} Clicks' for i in range(1, len(project_duration_scenarios[duration])+1)]])
+if __name__ == "__main__":
+    main()
