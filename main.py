@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 
@@ -56,3 +57,31 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+import matplotlib.pyplot as plt
+
+# Erstellung des Liniendiagramms
+def create_visualization(df):
+    months = ["Current"] + [f"Month {i}" for i in range(1, 13)]
+    total_clicks = [df["Clicks"].sum()]
+    for month in range(1, 13):
+        total_clicks.append(df[f"Estimated Clicks Month {month}"].sum())
+    
+    plt.figure(figsize=(12, 6))
+    plt.plot(months, total_clicks, marker='o', color='b')
+    
+    for i, (month, value) in enumerate(zip(months[1:], total_clicks[1:])):
+        plt.text(month, value, f"{monthly_improvements[i]*100:.0f}%", ha='center', va='bottom')
+
+    plt.title('Gesamtklicks pro Monat (Aktuell und Prognostiziert)')
+    plt.xlabel('Monat')
+    plt.ylabel('Gesamtklicks')
+    plt.grid(True)
+    plt.ylim(df["Clicks"].sum(), max(total_clicks) + 0.05 * max(total_clicks))
+    plt.tight_layout()
+    
+    st.pyplot(plt)
+
+# Anzeigen der Visualisierung
+if result_df is not None:
+    create_visualization(result_df)
