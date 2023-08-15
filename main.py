@@ -48,6 +48,17 @@ def main():
             data[f"Improvement Month {month} (in percent)"] = monthly_improvements[month - 1] * 100
             data[f"Estimated Position Month {month}"] = data["Position"] - (data["Position"] - 1) * monthly_improvements[month - 1]
             data[f"Estimated Clicks Month {month}"] = data['Avg. monthly searches'] * data[f"Estimated Position Month {month}"].apply(get_avg_ctr_corrected)
+
+        # Summenzeile hinzufügen
+        sum_row = {
+            "Avg. monthly searches": data["Avg. monthly searches"].sum()
+        }
+        for month in range(1, 13):
+            sum_row[f"Estimated Clicks Month {month}"] = data[f"Estimated Clicks Month {month}"].sum()
+        
+        data = data.append(sum_row, ignore_index=True)
+
+
         
         st.write(data)
 
