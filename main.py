@@ -1,4 +1,5 @@
 import base64
+import matplotlib.pyplot as plt
 
 import streamlit as st
 import pandas as pd
@@ -81,4 +82,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-import matplotlib.pyplot as plt
