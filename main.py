@@ -56,6 +56,10 @@ def main():
         
         # Displaying the sum DataFrame below the main DataFrame
         st.write(sum_data)
+        
+        # Displaying the line chart for Estimated Clicks per month
+        st.write("Liniendiagramm: Geschätzte Klicks pro Monat")
+        st.line_chart(sum_data.T, use_container_width=True)
 
 
         csv = data.to_csv(index=False)
