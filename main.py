@@ -66,7 +66,7 @@ def main():
 
         ax.plot(months, sum_data.values[0], marker="o", color="b")
         ax.set_title("Geschätzte Klicks pro Monat")
-        ax.set_xlabel("Monat")
+        ax.set_xlabel("Progression over 12 months")
         ax.set_ylabel("Clicks per month")
         ax.grid(True, which="both", linestyle="--", linewidth=0.5)
         st.pyplot(fig)
@@ -74,7 +74,6 @@ def main():
         # Sorting the columns in the correct order before creating the line chart
         # Ensuring the columns are in the correct order for the line chart
         sum_data = sum_data[[f"Estimated Clicks Month {i}" for i in range(1, 13)]]
-        st.line_chart(sum_data.T, use_container_width=True)
 
 
         csv = data.to_csv(index=False)
