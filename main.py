@@ -82,6 +82,7 @@ def create_visualization(df):
     
     st.pyplot(plt)
 
+result_df = None
 # Anzeigen der Visualisierung
 if result_df is not None:
     create_visualization(result_df)
