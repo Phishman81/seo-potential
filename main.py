@@ -50,13 +50,15 @@ def main():
             data[f"Estimated Clicks Month {month}"] = data['Avg. monthly searches'] * data[f"Estimated Position Month {month}"].apply(get_avg_ctr_corrected)
         
         # Summenzeile hinzufügen
-        sum_row = {
-            "Avg. monthly searches": data["Avg. monthly searches"].sum()
-        }
-        for month in range(1, 13):
-            sum_row[f"Estimated Clicks Month {month}"] = data[f"Estimated Clicks Month {month}"].sum()
-        
+        sum_row = {}
+        for column in data.columns:
+            if column == "Avg. monthly searches" or column.startswith("Estimated Clicks Month"):
+                sum_row[column] = data[column].sum()
+            else:
+                sum_row[column] = ''  # Für andere Spalten setzen wir leere Werte
+
         data = data.append(sum_row, ignore_index=True)
+
         
         st.write(data)
 
