@@ -61,6 +61,9 @@ def main():
         # Displaying the line chart for Estimated Clicks per month
         # Creating the line chart using matplotlib
         fig, ax = plt.subplots(figsize=(10, 6))
+        # Defining the months for the x-axis
+        months = [f"Month {i}" for i in range(1, 13)]
+
         ax.plot(months, sum_data.values[0], marker="o", color="b")
         ax.set_title("Geschätzte Klicks pro Monat")
         ax.set_xlabel("Monat")
