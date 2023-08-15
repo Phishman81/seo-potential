@@ -86,4 +86,5 @@ def create_visualization(df):
 result_df = None
 # Anzeigen der Visualisierung
 if result_df is not None:
+st.write(result_df)
     create_visualization(result_df)
