@@ -52,13 +52,15 @@ def main():
         # Summenzeile hinzufügen
         sum_row = {}
         for column in data.columns:
-            if column == "Avg. monthly searches" or column.startswith("Estimated Clicks Month"):
+            if column == "Avg. monthly searches":
+                sum_row[column] = data[column].sum()
+            elif "Estimated Clicks Month" in column:
                 sum_row[column] = data[column].sum()
             else:
-                sum_row[column] = ''  # Für andere Spalten setzen wir leere Werte
+                sum_row[column] = None  # Für andere Spalten setzen wir None (oder einen anderen geeigneten Standardwert)
 
         data = data.append(sum_row, ignore_index=True)
-
+        
         
         st.write(data)
 
