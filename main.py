@@ -64,7 +64,7 @@ def main():
         # Setting the y-axis formatter to use whole numbers
         from matplotlib.ticker import ScalarFormatter
         ax.yaxis.set_major_formatter(ScalarFormatter(useMathText=False, useOffset=False))
-        ax.ticklabel_format(style="plain")
+        ax.get_yaxis().set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:,}".format(int(x))))
 
         # Defining the months for the x-axis
         months = [f"Month {i}" for i in range(1, 13)]
