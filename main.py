@@ -38,7 +38,6 @@ def get_avg_ctr_corrected(position):
 # Hauptfunktion der Streamlit-App
 def main():
     st.title("Berechnung der monatlichen geschätzten Klicks")
-
     uploaded_file = st.file_uploader("Laden Sie Ihre CSV-Datei hoch", type=["csv"])
     
     if uploaded_file is not None:
@@ -50,9 +49,8 @@ def main():
             data[f"Estimated Clicks Month {month}"] = data['Avg. monthly searches'] * data[f"Estimated Position Month {month}"].apply(get_avg_ctr_corrected)
         
         st.write(data)
-
         csv = data.to_csv(index=False)
-        b64 = b64 = base64.b64encode(csv.encode()).decode()
+        b64 = base64.b64encode(csv.encode()).decode()
         href = f'<a href="data:file/csv;base64,{b64}" download="estimated_clicks_monthly_details.csv">Download CSV File</a>'
         st.markdown(href, unsafe_allow_html=True)
 
@@ -80,11 +78,10 @@ def create_visualization(df):
     plt.grid(True)
     plt.ylim(df["Clicks"].sum(), max(total_clicks) + 0.05 * max(total_clicks))
     plt.tight_layout()
-    
     st.pyplot(plt)
 
 result_df = None
 # Anzeigen der Visualisierung
 if result_df is not None:
-st.write(result_df)
+    st.write(result_df)
     create_visualization(result_df)
