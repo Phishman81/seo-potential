@@ -1,7 +1,7 @@
 import base64
-
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # CTR-Bereiche
 ctr_ranges_adjusted = {
@@ -48,7 +48,7 @@ def main():
             data[f"Improvement Month {month} (in percent)"] = monthly_improvements[month - 1] * 100
             data[f"Estimated Position Month {month}"] = data["Position"] - (data["Position"] - 1) * monthly_improvements[month - 1]
             data[f"Estimated Clicks Month {month}"] = data['Avg. monthly searches'] * data[f"Estimated Position Month {month}"].apply(get_avg_ctr_corrected)
-
+        
         # Summenzeile hinzufügen
         sum_row = {
             "Avg. monthly searches": data["Avg. monthly searches"].sum()
@@ -57,20 +57,16 @@ def main():
             sum_row[f"Estimated Clicks Month {month}"] = data[f"Estimated Clicks Month {month}"].sum()
         
         data = data.append(sum_row, ignore_index=True)
-
-
         
         st.write(data)
 
         csv = data.to_csv(index=False)
-        b64 = b64 = base64.b64encode(csv.encode()).decode()
+        b64 = base64.b64encode(csv.encode()).decode()
         href = f'<a href="data:file/csv;base64,{b64}" download="estimated_clicks_monthly_details.csv">Download CSV File</a>'
         st.markdown(href, unsafe_allow_html=True)
 
-if __name__ == "__main__":
-    main()
-
-import matplotlib.pyplot as plt
+        # Anzeigen der Visualisierung
+        create_visualization(data)
 
 # Erstellung des Liniendiagramms
 def create_visualization(df):
@@ -94,7 +90,5 @@ def create_visualization(df):
     
     st.pyplot(plt)
 
-result_df = None
-# Anzeigen der Visualisierung
-if result_df is not None:
-    create_visualization(result_df)
+if __name__ == "__main__":
+    main()
