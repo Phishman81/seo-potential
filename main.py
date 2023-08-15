@@ -61,21 +61,26 @@ def main():
         # Displaying the line chart for Estimated Clicks per month
         # Creating the line chart using matplotlib
         fig, ax = plt.subplots(figsize=(10, 6))
+        # Setting the y-axis formatter to use whole numbers
+        from matplotlib.ticker import ScalarFormatter
+        ax.yaxis.set_major_formatter(ScalarFormatter(useMathText=False, useOffset=False))
+        ax.ticklabel_format(style="plain")
+
         # Defining the months for the x-axis
         months = [f"Month {i}" for i in range(1, 13)]
 
         ax.plot(months, sum_data.values[0], marker="o", color="b")
         ax.set_title("Geschätzte Klicks pro Monat")
-        ax.set_xlabel("Progression over 12 months")
+        ax.set_xlabel("Monat")
         ax.set_ylabel("Clicks per month")
         ax.grid(True, which="both", linestyle="--", linewidth=0.5)
         st.pyplot(fig)
-        
+        st.write("Liniendiagramm: Geschätzte Klicks pro Monat")
         # Sorting the columns in the correct order before creating the line chart
         # Ensuring the columns are in the correct order for the line chart
         sum_data = sum_data[[f"Estimated Clicks Month {i}" for i in range(1, 13)]]
 
-        
+
         csv = data.to_csv(index=False)
         b64 = b64 = base64.b64encode(csv.encode()).decode()
         href = f'<a href="data:file/csv;base64,{b64}" download="estimated_clicks_monthly_details.csv">Download CSV File</a>'
