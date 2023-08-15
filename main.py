@@ -70,12 +70,12 @@ def main():
         ax.set_ylabel("Clicks per month")
         ax.grid(True, which="both", linestyle="--", linewidth=0.5)
         st.pyplot(fig)
-        st.write("Liniendiagramm: Geschätzte Klicks pro Monat")
+        
         # Sorting the columns in the correct order before creating the line chart
         # Ensuring the columns are in the correct order for the line chart
         sum_data = sum_data[[f"Estimated Clicks Month {i}" for i in range(1, 13)]]
 
-
+        
         csv = data.to_csv(index=False)
         b64 = b64 = base64.b64encode(csv.encode()).decode()
         href = f'<a href="data:file/csv;base64,{b64}" download="estimated_clicks_monthly_details.csv">Download CSV File</a>'
