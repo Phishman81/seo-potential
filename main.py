@@ -60,8 +60,8 @@ def main():
         # Displaying the line chart for Estimated Clicks per month
         st.write("Liniendiagramm: Geschätzte Klicks pro Monat")
         # Sorting the columns in the correct order before creating the line chart
-        sorted_columns = [f"Estimated Clicks Month {i}" for i in range(1, 13)]
-        sum_data = sum_data[sorted_columns]
+        # Ensuring the columns are in the correct order for the line chart
+        sum_data = sum_data[[f"Estimated Clicks Month {i}" for i in range(1, 13)]]
         st.line_chart(sum_data.T, use_container_width=True)
 
 
