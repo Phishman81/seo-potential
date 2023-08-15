@@ -50,6 +50,13 @@ def main():
             data[f"Estimated Clicks Month {month}"] = data['Avg. monthly searches'] * data[f"Estimated Position Month {month}"].apply(get_avg_ctr_corrected)
         
         st.write(data)
+        # Compute the sum of Estimated Clicks for each month
+        sum_data = pd.DataFrame([data[f"Estimated Clicks Month {i}"].sum() for i in range(1, 13)]).T
+        sum_data.columns = [f"Estimated Clicks Month {i}" for i in range(1, 13)]
+        
+        # Displaying the sum DataFrame below the main DataFrame
+        st.write(sum_data)
+
 
         csv = data.to_csv(index=False)
         b64 = b64 = base64.b64encode(csv.encode()).decode()
