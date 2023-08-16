@@ -27,7 +27,7 @@ ctr_ranges_adjusted = {
 }
 
 # Monatliche Verbesserungen
-monthly_improvements = [0.01, 0.10, 0.80, 0.50, 0.55, 0.70, 0.73, 0.75, 0.77, 0.85, 0.97, 1.00]
+monthly_improvements = [0.01, 0.10, 0.80, 0.85, 0.87, 0.92, 0.95, 0.96, 0.97, 0.98, 0.99, 1.00]
 # backup: monthly_improvements = [0.01, 0.04, 0.06, 0.09, 0.15, 0.27, 0.45, 0.57, 0.67, 0.70, 0.81, 1.00]
 
 # Funktion, um den durchschnittlichen CTR basierend auf der Position zu erhalten
