@@ -75,7 +75,7 @@ def main():
         ax.set_ylabel("Clicks per month")
         ax.grid(True, which="both", linestyle="--", linewidth=0.5)
         st.pyplot(fig)
-        st.write("Liniendiagramm: Geschätzte Klicks pro Monat")
+        st.write("Download the table data with estimated clicks projection")
         # Sorting the columns in the correct order before creating the line chart
         # Ensuring the columns are in the correct order for the line chart
         sum_data = sum_data[[f"Estimated Clicks Month {i}" for i in range(1, 13)]]
