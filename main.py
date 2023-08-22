@@ -27,8 +27,7 @@ ctr_ranges_adjusted = {
 }
 
 # Monatliche Verbesserungen
-monthly_improvements = [0.01, 0.55, 0.80, 0.85, 0.87, 0.92, 0.95, 0.96, 0.97, 0.98, 0.99, 1.00]
-# backup: monthly_improvements = [0.01, 0.04, 0.06, 0.09, 0.15, 0.27, 0.45, 0.57, 0.67, 0.70, 0.81, 1.00]
+monthly_improvements = [0.01, 0.04, 0.06, 0.09, 0.15, 0.27, 0.45, 0.57, 0.67, 0.70, 0.81, 1.00]
 
 # Funktion, um den durchschnittlichen CTR basierend auf der Position zu erhalten
 def get_avg_ctr_corrected(position):
@@ -76,7 +75,7 @@ def main():
         ax.set_ylabel("Clicks per month")
         ax.grid(True, which="both", linestyle="--", linewidth=0.5)
         st.pyplot(fig)
-        st.write("Download the table data with estimated clicks projection")
+        st.write("Liniendiagramm: Geschätzte Klicks pro Monat")
         # Sorting the columns in the correct order before creating the line chart
         # Ensuring the columns are in the correct order for the line chart
         sum_data = sum_data[[f"Estimated Clicks Month {i}" for i in range(1, 13)]]
